@@ -2,6 +2,7 @@
 #include <fstream>
 
 #include <cmath>
+//#include <functional>
 #include <algorithm>
 #define AREA Width * Height
 
@@ -77,20 +78,19 @@ void Picture::draw_point(int x, int y, double alpha, unsigned char Brightness)
     double  LineColorLinear = Brightness / 255.0,
         ImgColorSRGB = Image[Width * y + x] / 255.0,
         ImgColorLinear = ImgColorSRGB <= 0.04045 ? ImgColorSRGB / 12.92 : pow((ImgColorSRGB + 0.055) / 1.055, 2.4),
-        c_Linear = (1 - alpha) * LineColorLinear + alpha * ImgColorLinear,
-        c_sRGB = c_Linear <= 0.0031308 ? 12.92 * c_Linear : 1.055 * pow(c_Linear, 1 / 2.4) - 0.055;
-    Image[Width * y + x] = 255 * c_sRGB;
+        C_Linear = (1 - alpha) * LineColorLinear + alpha * ImgColorLinear,
+        C_sRGB = C_Linear <= 0.0031308 ? 12.92 * C_Linear : 1.055 * pow(C_Linear, 1 / 2.4) - 0.055;
+        Image[Width * y + x] = 255 * C_sRGB;
 }
 
-void Picture::line_draw(float x_first, float y_first, float x_end, float y_end,
-    unsigned char Brightness, float Thickness, float GammaCorrection)
+void Picture::line_draw(float x_first, float y_first, float x_end, float y_end, unsigned char Brightness, float Thickness, float GammaCorrection)
 {
     if (Thickness <= 0)
         return;
 
-    bool isSteep = abs(y_end - y_first) > abs(x_end - x_first);
+    bool is_steep = abs(y_end - y_first) > abs(x_end - x_first);
 
-    auto intPart = [](double x) -> int
+    auto IntPart = [](double x) -> int
     {
         return static_cast<int>(x);
     };
@@ -103,16 +103,16 @@ void Picture::line_draw(float x_first, float y_first, float x_end, float y_end,
     auto plot = [&](int x, int y, double Intensity) -> void
     {
         GammaCorrection == 0 ?
-            isSteep ?
+            is_steep ?
             draw_point(y, x, 1.0 - Intensity, Brightness) :
             draw_point(x, y, 1.0 - Intensity, Brightness)
             :
-            isSteep ?
+            is_steep ?
             draw_point(y, x, 1.0 - Intensity, Brightness, GammaCorrection) :
             draw_point(x, y, 1.0 - Intensity, Brightness, GammaCorrection);
     };
 
-    if (isSteep)
+    if (is_steep)
     {
         swap(x_first, y_first);
         swap(x_end, y_end);
@@ -130,7 +130,7 @@ void Picture::line_draw(float x_first, float y_first, float x_end, float y_end,
 
     for (int x = (int)round(x_first); x <= (int)round(x_end); ++x)
     {
-        for (int plotY = intPart(y - (Thickness - 1) / 2); plotY <= intPart(y - (Thickness - 1) / 2 + Thickness); ++plotY)
+        for (int plotY = IntPart(y - (Thickness - 1) / 2); plotY <= IntPart(y - (Thickness - 1) / 2 + Thickness); ++plotY)
             plot(x, plotY, min(1.0, (Thickness + 1.0) / 2.0 - fabs(y - plotY)));
         y += Grad;
     }
