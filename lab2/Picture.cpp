@@ -2,7 +2,6 @@
 #include <fstream>
 
 #include <cmath>
-//#include <functional>
 #include <algorithm>
 #define AREA Width * Height
 
