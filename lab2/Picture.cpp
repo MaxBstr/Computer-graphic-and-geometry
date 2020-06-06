@@ -2,6 +2,7 @@
 #include <fstream>
 
 #include <cmath>
+//#include <functional>
 #include <algorithm>
 #define AREA Width * Height
 
@@ -59,27 +60,28 @@ void Picture::file_write(const string & f_name)
     fout.close();
 }
 
-void Picture::draw_point(int x, int y, double alpha, unsigned char Brightness, float GammaCorrection)
+void Picture::draw_point(int x, int y, double alpha, unsigned char Color, float GammaCorrection)
 {
     alpha = max(min(alpha, 1.0), 0.0);
     if (y < 0 || y >= Height || x < 0 || x >= Width)
         return;
-    Image[Width * y + x] = 255 * pow((alpha * Image[Width * y + x] + Brightness * (1 - alpha)) / 255.0,
+    Image[Width * y + x] = 255 * pow((alpha * Image[Width * y + x] + Color * (1 - alpha)) / 255.0,
         (1.0 / GammaCorrection - 1.0) * (1.0 - alpha) + 1.0);
 }
 
-void Picture::draw_point(int x, int y, double alpha, unsigned char Brightness)
+void Picture::draw_point(int x, int y, double alpha, unsigned char Color)
 {
     alpha = max(min(alpha, 1.0), 0.0);
     if (y < 0 || y >= Height || x < 0 || x >= Width)
         return;
 
-    double  LineColorLinear = Brightness / 255.0,
-        ImgColorSRGB = Image[Width * y + x] / 255.0,
-        ImgColorLinear = ImgColorSRGB <= 0.04045 ? ImgColorSRGB / 12.92 : pow((ImgColorSRGB + 0.055) / 1.055, 2.4),
-        C_Linear = (1 - alpha) * LineColorLinear + alpha * ImgColorLinear,
-        C_sRGB = C_Linear <= 0.0031308 ? 12.92 * C_Linear : 1.055 * pow(C_Linear, 1 / 2.4) - 0.055;
-        Image[Width * y + x] = 255 * C_sRGB;
+    double  LineColorSRGB = Color / 255.0 // получаем коэффициент линии srgb
+        LineColorLinear = LineColorSRGB <= 0.04045 ? LineColorSRGB / 12.92 : pow((LineColorSRGB + 0.055) / 1.055, 2.4), //конвертация из srgb цвета линии в линейное
+        ImgColorSRGB = Image[Width * y + x] / 255.0, //пиксель в srgb, получаем коэффициент из картинки
+        ImgColorLinear = ImgColorSRGB <= 0.04045 ? ImgColorSRGB / 12.92 : pow((ImgColorSRGB + 0.055) / 1.055, 2.4), //перевод коэфа в линейный из srgb
+        C_Linear = (1 - alpha) * LineColorLinear + alpha * ImgColorLinear, //получение нового цвета пикселя, накладка 2х пикселей
+        C_sRGB = C_Linear <= 0.0031308 ? 12.92 * C_Linear : 1.055 * pow(C_Linear, 1.0 / 2.4) - 0.055; //перевод в srgb
+        Image[Width * y + x] = 255 * C_sRGB; //перевод из коэффа в палитру
 }
 
 void Picture::line_draw(float x_first, float y_first, float x_end, float y_end, unsigned char Brightness, float Thickness, float GammaCorrection)
