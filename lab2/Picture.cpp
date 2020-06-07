@@ -2,6 +2,7 @@
 #include <fstream>
 
 #include <cmath>
+//#include <functional>
 #include <algorithm>
 #define AREA Width * Height
 
@@ -64,8 +65,14 @@ void Picture::draw_point(int x, int y, double alpha, unsigned char Color, float 
     alpha = max(min(alpha, 1.0), 0.0);
     if (y < 0 || y >= Height || x < 0 || x >= Width)
         return;
-    Image[Width * y + x] = 255 * pow((alpha * Image[Width * y + x] + Color * (1 - alpha)) / 255.0,
-        (1.0 / GammaCorrection - 1.0) * (1.0 - alpha) + 1.0);
+
+    double LineColorGamma = Color / 255.0; //коэффициент
+    double LineColorLinear = pow(LineColorGamma, GammaCorrection); //получение линейного цвета
+    double PicColorGamma = Image[Width * y + x] / 255.0; //коэффициент
+    double PicColorLinear = pow(PicColorGamma, GammaCorrection); //получение линейного цвета
+    double C_Linear = (1 - alpha) * LineColorLinear + alpha * PicColorLinear; //наложение
+    double C_Gamma = pow(C_Linear, 1.0 / GammaCorrection); //результирующий коэф
+    Image[Width * y + x] = 255 * C_Gamma; //сам цвет
 }
 
 void Picture::draw_point(int x, int y, double alpha, unsigned char Color)
