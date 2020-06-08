@@ -3,9 +3,10 @@
 
 #include <cmath>
 #include <algorithm>
-#define AREA Width * Height
 
-using NewPoint = pair<float, float>;
+#define AREA Width * Height
+#define EPS 1e-5
+
 const short PGM = 5, COLOR_DEPTH = 255;
 
 Picture::Picture() = default;
@@ -59,104 +60,125 @@ void Picture::file_write(const string & f_name)
     fout.close();
 }
 
-void Picture::draw_point(int x, int y, double alpha, unsigned char Color, float GammaCorrection)
-{
-    alpha = max(min(alpha, 1.0), 0.0);
-    if (y < 0 || y >= Height || x < 0 || x >= Width)
+void Picture::drawPoint(int X, int Y, double Alpha, unsigned char Color, double Gamma) {
+    Alpha = max(min(Alpha, 1.0), 0.0);
+    if (Y < 0 || Y >= Height || X < 0 || X >= Width)
         return;
 
-    double LineColorGamma = Color / 255.0; //коэффициент
-    double LineColorLinear = pow(LineColorGamma, GammaCorrection); //получение линейного цвета
-    double PicColorGamma = Image[Width * y + x] / 255.0; //коэффициент
-    double PicColorLinear = pow(PicColorGamma, GammaCorrection); //получение линейного цвета
-    double C_Linear = (1 - alpha) * LineColorLinear + alpha * PicColorLinear; //наложение
-    double C_Gamma = pow(C_Linear, 1.0 / GammaCorrection); //результирующий коэф
-    Image[Width * y + x] = 255 * C_Gamma; //сам цвет
-}
-
-void Picture::draw_point(int x, int y, double alpha, unsigned char Color)
-{
-    alpha = max(min(alpha, 1.0), 0.0);
-    if (y < 0 || y >= Height || x < 0 || x >= Width)
+    if (Alpha == 0)
         return;
 
-    double  LineColorSRGB = Color / 255.0,
-        LineColorLinear = LineColorSRGB <= 0.04045 ? LineColorSRGB / 12.92 : pow((LineColorSRGB + 0.055) / 1.055, 2.4), //конвертация из srgb цвета линии в линейное
-        ImgColorSRGB = Image[Width * y + x] / 255.0, //пиксель в srgb, получаем коэффициент
-        ImgColorLinear = ImgColorSRGB <= 0.04045 ? ImgColorSRGB / 12.92 : pow((ImgColorSRGB + 0.055) / 1.055, 2.4), //перевод коэфа в линейный из srgb
-        C_Linear = (1 - alpha) * LineColorLinear + alpha * ImgColorLinear, //получение нового цвета пикселя, накладка 2х пикселей
-        C_sRGB = C_Linear <= 0.0031308 ? 12.92 * C_Linear : 1.055 * pow(C_Linear, 1.0 / 2.4) - 0.055; //перевод в srgb
-        Image[Width * y + x] = 255 * C_sRGB; //перевод из коэффа в палитру
+    if (Gamma == 0)
+    {
+        double LineColorSRGB = Color / 255.0; //коэффициент
+        double LineColorLinear = LineColorSRGB <= 0.04045 ? LineColorSRGB / 12.92 : pow((LineColorSRGB + 0.055) / 1.055, 2.4); //конвертация из srgb цвета линии в линейное
+        double PicColorSRGB = Image[Width * Y + X] / 255.0; //пиксель в srgb, получаем коэффициент
+        double PicColorLinear = PicColorSRGB <= 0.04045 ? PicColorSRGB / 12.92 : pow((PicColorSRGB + 0.055) / 1.055, 2.4); //перевод коэфа в линейный из srgb
+        double C_Linear = (1 - Alpha) * PicColorLinear + Alpha * LineColorLinear; //получение нового цвета пикселя, накладка 2х пикселей
+        double C_SRGB = C_Linear <= 0.0031308 ? 12.92 * C_Linear : 1.055 * pow(C_Linear, 1 / 2.4) - 0.055; //перевод в srgb
+        Image[Width * Y + X] = 255 * C_SRGB; //перевод из коэффа в палитру
+    }
+    else
+    {
+        double LineColorGamma = Color / 255.0; //коэффициент
+        double LineColorLinear = pow(LineColorGamma, Gamma); //получение линейного цвета
+        double PicColorGamma = Image[Width * Y + X] / 255.0; //коэффициент
+        double PicColorLinear = pow(PicColorGamma, Gamma); //получение линейного цвета
+        double C_Linear = (1 - Alpha) * PicColorLinear + Alpha * LineColorLinear; //наложение
+        double C_Gamma = pow(C_Linear, 1.0 / Gamma); //результирующий коэф
+        Image[Width * Y + X] = 255 * C_Gamma; //сам цвет
+    }
 }
 
-void Picture::line_draw(float x_first, float y_first, float x_end, float y_end, unsigned char Brightness, float Thickness, float GammaCorrection)
+void Picture::draw_line(double X_First, double Y_First, double X_End, double Y_End, unsigned char Color, double Thickness, double Gamma)
 {
+
     if (Thickness <= 0)
         return;
 
-    bool is_steep = abs(y_end - y_first) > abs(x_end - x_first);
+    StartPoint = { X_First, Y_First };
+    EndPoint   = { X_End, Y_End };
 
-    auto IntPart = [](double x) -> int
-    {
-        return static_cast<int>(x);
+    Point Vector = {(EndPoint.y - StartPoint.y) * 0.5 * Thickness / sqrt((EndPoint.y - StartPoint.y) * (EndPoint.y - StartPoint.y) + (StartPoint.x - EndPoint.x) * (StartPoint.x - EndPoint.x))
+            , (StartPoint.x - EndPoint.x) * 0.5 * Thickness / sqrt((EndPoint.y - StartPoint.y) * (EndPoint.y - StartPoint.y) + (StartPoint.x - EndPoint.x) * (StartPoint.x - EndPoint.x))};
+
+    Point A = {StartPoint.x + Vector.x, StartPoint.y + Vector.y};
+    Point B = {EndPoint.x + Vector.x, EndPoint.y + Vector.y};
+    Point C = {EndPoint.x - Vector.x, EndPoint.y - Vector.y};
+    Point D = {StartPoint.x - Vector.x, StartPoint.y - Vector.y};
+
+    Line = { A, B, C, D }; // vector Line
+    // drawing raster Line
+    Point LT{ min(min(A.x, B.x), min(C.x, D.x)), min(min(A.y, B.y), min(C.y, D.y)) };
+    Point RB{ max(max(A.x, B.x), max(C.x, D.x)), max(max(A.y, B.y), max(C.y, D.y)) };
+
+    for (int x = (int)LT.x - 3; x <= RB.x + 3; x++)
+        for (int y = (int)LT.y - 3; y <= RB.y + 3; y++)
+            drawPoint(x, y, Opacity(x, y), Color, Gamma);
+}
+
+double Picture::Opacity(double x, double y)
+{
+    Point A = { x, y } ;
+    Point B = { x + 1, y };
+    Point C = { x + 1, y + 1 };
+    Point D = { x, y + 1 };
+
+    auto CheckPoint = [](Rectangle Rectangle, Point p) -> bool
+            {
+        auto TriangleArea = [](Point A, Point B, Point C) -> double
+                {
+            return sqrt((
+                                (
+                                        sqrt((A.x - B.x) * (A.x - B.x) + (A.y - B.y) * (A.y - B.y)) +
+                                        sqrt((A.x - C.x) * (A.x - C.x) + (A.y - C.y) * (A.y - C.y)) + // p
+                                        sqrt((C.x - B.x) * (C.x - B.x) + (C.y - B.y) * (C.y - B.y))
+                                ) / 2
+                        ) * (
+                                (
+                                        -sqrt((A.x - B.x) * (A.x - B.x) + (A.y - B.y) * (A.y - B.y)) +
+                                        sqrt((A.x - C.x) * (A.x - C.x) + (A.y - C.y) * (A.y - C.y)) + // p - a
+                                        sqrt((C.x - B.x) * (C.x - B.x) + (C.y - B.y) * (C.y - B.y))
+                                ) / 2
+                        ) * (
+                                (
+                                        sqrt((A.x - B.x) * (A.x - B.x) + (A.y - B.y) * (A.y - B.y)) -
+                                        sqrt((A.x - C.x) * (A.x - C.x) + (A.y - C.y) * (A.y - C.y)) + // p - b
+                                        sqrt((C.x - B.x) * (C.x - B.x) + (C.y - B.y) * (C.y - B.y))
+                                ) / 2
+                        ) * (
+                                (
+                                        sqrt((A.x - B.x) * (A.x - B.x) + (A.y - B.y) * (A.y - B.y)) +
+                                        sqrt((A.x - C.x) * (A.x - C.x) + (A.y - C.y) * (A.y - C.y)) - // p - c
+                                        sqrt((C.x - B.x) * (C.x - B.x) + (C.y - B.y) * (C.y - B.y))
+                                ) / 2
+                        ));
+        };
+        return fabs
+        (
+                sqrt((Rectangle.A.x - Rectangle.D.x) * (Rectangle.A.x - Rectangle.D.x) +
+                     (Rectangle.A.y - Rectangle.D.y) * (Rectangle.A.y - Rectangle.D.y)) *
+                sqrt((Rectangle.A.x - Rectangle.B.x) * (Rectangle.A.x - Rectangle.B.x) +
+                     (Rectangle.A.y - Rectangle.B.y) * (Rectangle.A.y - Rectangle.B.y))
+                -
+                TriangleArea(p, Rectangle.A, Rectangle.B) - TriangleArea(p, Rectangle.B, Rectangle.C) -
+                TriangleArea(p, Rectangle.C, Rectangle.D) - TriangleArea(p, Rectangle.D, Rectangle.A)
+        ) < EPS;
     };
+    if (
+            CheckPoint(Line, A) &&
+            CheckPoint(Line, B) &&
+            CheckPoint(Line, C) &&
+            CheckPoint(Line, D)
+        )
+        return 1;
 
-    auto get_distance = [](NewPoint a, NewPoint b) -> double
+    double Area = 0;
+    for (double i = x; i < x + 1; i += 0.1)
     {
-        return sqrt(pow(a.first - b.first, 2) + pow(a.second - b.second, 2));
-    };
-
-    auto plot = [&](int x, int y, double Intensity) -> void
-    {
-        GammaCorrection == 0 ?
-            is_steep ?
-            draw_point(y, x, 1.0 - Intensity, Brightness) :
-            draw_point(x, y, 1.0 - Intensity, Brightness)
-            :
-            is_steep ?
-            draw_point(y, x, 1.0 - Intensity, Brightness, GammaCorrection) :
-            draw_point(x, y, 1.0 - Intensity, Brightness, GammaCorrection);
-    };
-
-    if (is_steep)
-    {
-        swap(x_first, y_first);
-        swap(x_end, y_end);
+        for (double j = y; j < y + 1; j += 0.1)
+            if (CheckPoint(Line, { i, j }))
+                Area += 0.01;
     }
-    if (x_first > x_end)
-    {
-        swap(x_first, x_end);
-        swap(y_first, y_end);
-    }
-
-    double dx = x_end - x_first, dy = y_end - y_first;
-    double Grad = dy / dx;
-
-    double y = y_first + Grad * (round(x_first) - x_first);
-
-    for (int x = (int)round(x_first); x <= (int)round(x_end); ++x)
-    {
-        for (int plotY = IntPart(y - (Thickness - 1) / 2); plotY <= IntPart(y - (Thickness - 1) / 2 + Thickness); ++plotY)
-            plot(x, plotY, min(1.0, (Thickness + 1.0) / 2.0 - fabs(y - plotY)));
-        y += Grad;
-    }
-
-    NewPoint plotStart = make_pair(round(x_first), round(y_first));
-
-    for (int plotX = int(round(x_first) - Thickness / 2); plotX < (int)round(x_first); ++plotX)
-    {
-        y = y_first + Grad * ((float)plotX - x_first);
-
-        for (int plotY = int(y - (Thickness - 1) / 2.0); plotY <= int(y - (Thickness - 1) / 2.0 + Thickness); ++plotY)
-            plot(plotX, plotY, min(1.0, (Thickness + 0.5) / 2.0 -get_distance({ (float)plotX, (float)plotY }, plotStart)));
-    }
-
-    NewPoint plotEnd = { round(x_end), round(y_end) };
-
-    for (int plotX = (int)round(x_end) + 1; plotX <= int(round(x_end) + Thickness / 2); plotX++)
-    {
-        y = y_first + Grad * ((float)plotX - x_first);
-        for (int plotY = int(y - (Thickness - 1) / 2.0); plotY <= int(y - (Thickness - 1) / 2.0 + Thickness); ++plotY)
-            plot(plotX, plotY, min(1.0, (Thickness + 0.5) / 2.0 - get_distance({ (float)plotX, (float)plotY }, plotEnd)));   
-    }
+    return Area;
 }
