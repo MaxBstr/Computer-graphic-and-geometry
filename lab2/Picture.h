@@ -13,14 +13,28 @@ public:
 
     void file_read(const string&);
     void file_write(const string&);
-
-    void line_draw(float, float, float, float, unsigned char, float, float = 0);
+    
+    void draw_line(double, double, double, double, unsigned char, double, double);
 
 private:
     vector<unsigned char> Image;
     short Format;
     int Width, Height, ColorDepth;
 
-    void draw_point(int, int, double, unsigned char);
-    void draw_point(int, int, double, unsigned char, float);
+    struct Point {
+        double x;
+        double y;
+        Point& operator=(const Point& other) = default;
+    };
+    struct Rectangle
+    {
+        Point A, B, C, D;
+    };
+
+    struct Point StartPoint, EndPoint;
+    struct Rectangle Line;
+
+    void drawPoint(int, int, double, unsigned char, double);
+
+    double Opacity(double x, double y);
 };
