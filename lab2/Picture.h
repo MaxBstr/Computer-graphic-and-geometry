@@ -21,7 +21,8 @@ private:
     short Format;
     int Width, Height, ColorDepth;
 
-    struct Point {
+    struct Point 
+    {
         double x;
         double y;
         Point& operator=(const Point& other) = default;
