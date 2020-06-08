@@ -27,6 +27,7 @@ private:
         double y;
         Point& operator=(const Point& other) = default;
     };
+    
     struct Rectangle
     {
         Point A, B, C, D;
