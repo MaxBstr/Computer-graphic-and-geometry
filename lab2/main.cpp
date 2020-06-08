@@ -16,7 +16,7 @@ int main(int argc, char** argv)
     float x_first = stof(argv[5]), y_begin = stof(argv[6]);
     float x_end = stof(argv[7]), y_end = stof(argv[8]);
 
-    float GammaCorrection = 2.2;
+    float GammaCorrection;
     if (argc == 10)
         GammaCorrection = stof(argv[9]);
 
@@ -42,14 +42,14 @@ int main(int argc, char** argv)
     try
     {
         if (argc == 10)
-            PGM.line_draw(x_first, y_begin, x_end, y_end, Brightness, Thickness, GammaCorrection);
+            PGM.draw_line(x_first, y_begin, x_end, y_end, Brightness, Thickness, GammaCorrection);
         else
-            PGM.line_draw(x_first, y_begin, x_end, y_end, Brightness, Thickness);
+            PGM.draw_line(x_first, y_begin, x_end, y_end, Brightness, Thickness, 0);
     }
 
     catch (exception& e)
     {
-        cerr << "Failed to draw a line: " << e.what() << endl;
+        cerr << "Failed to draw a Line: " << e.what() << endl;
         return 1;
     }
 
