@@ -10,8 +10,8 @@ vector<string> ColorSpaces = {"RGB", "HSL", "HSV", "YCbCr.601", "YCbCr.709", "YC
 int main(int argc, char *argv[])
 {
     string StartColorSpace, EndColorSpace, FileInput, FileOutput;
-    int INC, OUTC;
-    bool WF = false;
+    int InputCount, OutCount;
+    bool IsWarning = false;
 
     for(int i = 1; i < argc; i ++)
     {
@@ -23,33 +23,34 @@ int main(int argc, char *argv[])
 
         if(string(argv[i]) == "-i" && i < argc - 2)
         {
-            INC = atoi(argv[i + 1]);
+            InputCount = atoi(argv[i + 1]);
             FileInput = string(argv[i + 2]);
         }
 
         if(string(argv[i]) == "-o" && i < argc - 2)
         {
-            OUTC = atoi(argv[i + 1]);
+            OutCount = atoi(argv[i + 1]);
             FileOutput = string(argv[i + 2]);
         }
     }
 
-    WF |= argc != 11;
-    WF |= StartColorSpace == "" || EndColorSpace == "" || FileInput == "" || FileOutput == "";
-    WF |= (INC != 1 && INC != 3);
-    WF |= (OUTC != 1 && OUTC != 3);
-    bool INF = false, OUTF = false;
+    IsWarning |= argc != 11;
+    IsWarning |= StartColorSpace == "" || EndColorSpace == "" || FileInput == "" || FileOutput == "";
+    IsWarning |= (InputCount != 1 && InputCount != 3);
+    IsWarning |= (OutCount != 1 && OutCount != 3);
+    
+    bool InSpaceDefined = false, OutSpaceDefined = false;
 
     for(int i = 0; i < ColorSpaces.size(); i++)
     {
         if(ColorSpaces[i] == StartColorSpace)
-            INF = true;
+            InSpaceDefined = true;
         if(ColorSpaces[i] == EndColorSpace)
-            OUTF = true;
+            OutSpaceDefined = true;
     }
-    WF |= (!INF) | (!OUTF);
+    IsWarning |= (!InSpaceDefined) | (!OutSpaceDefined);
 
-    if(WF)
+    if(IsWarning)
     {
         cerr << "WARNING! Command line arguments are invalid" << endl;
         return 1;
@@ -58,7 +59,7 @@ int main(int argc, char *argv[])
     PIC* IMG;
     try
     {
-        IMG = new PIC(INC, FileInput);
+        IMG = new PIC(InputCount, FileInput);
     }
     catch(const std::exception& e)
     {
@@ -71,7 +72,7 @@ int main(int argc, char *argv[])
 
     try
     {
-        IMG->WriteToFile(OUTC, FileOutput);
+        IMG->WriteToFile(OutCount, FileOutput);
     }
     catch(const exception& e)
     {
