@@ -1,42 +1,25 @@
 #pragma once
-
-#include <string>
 #include <vector>
+#include <string>
+using namespace std;
 
-#include "Warnings.h"
-
-class Picture
+class NewPoint
 {
 public:
-    Picture();
-    ~Picture();
+    double x, y;
+    NewPoint(double, double);
+};
 
-    void file_read(const string&);
-    void file_write(const string&);
-    
-    void draw_line(double, double, double, double, unsigned char, double, double);
-
+class PGM
+{
+public:
+    PGM(string);
+    void WriteToFile(string FName);
+    void DrawLine(NewPoint, NewPoint, double, int, double, bool);
 private:
-    vector<unsigned char> Image;
-    short Format;
-    int Width, Height, ColorDepth;
-
-    struct Point 
-    {
-        double x;
-        double y;
-        Point& operator=(const Point& other) = default;
-    };
-    
-    struct Rectangle
-    {
-        Point A, B, C, D;
-    };
-
-    struct Point StartPoint, EndPoint;
-    struct Rectangle Line;
-
-    void drawPoint(int, int, double, unsigned char, double);
-
-    double Opacity(double x, double y);
+    int Width;
+    int Height;
+    int ColorDepth;
+    vector<vector<unsigned char>> Picture;
+    void MakePlot(int, int, double, int, double, bool);
 };
