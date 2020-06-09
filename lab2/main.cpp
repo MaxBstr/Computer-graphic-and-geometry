@@ -1,69 +1,72 @@
 #include <iostream>
 #include "Picture.h"
 
-int main(int argc, char** argv)
+int main(int argc, char *argv[])
 {
-    if (argc != 9 && argc != 10)
+    if(argc != 9 && argc != 10)
     {
-        cerr << "Not enough or too much arguments!" << endl;
-        return 0;
+        cerr << "Too much or few command line arguments!" << "\n";
+        return 1;
     }
 
-    string input_file = argv[1], output_file = argv[2];
-    unsigned char Brightness = stoi(argv[3]);
-    float Thickness = stof(argv[4]);
-
-    float x_first = stof(argv[5]), y_begin = stof(argv[6]);
-    float x_end = stof(argv[7]), y_end = stof(argv[8]);
-
-    float GammaCorrection;
-    if (argc == 10)
-        GammaCorrection = stof(argv[9]);
-
-    Picture PGM;
+    const string Input = string(argv[1]);
+    const string Output = string(argv[2]);
+    double Thickness, X_Start, Y_Start, X_End, Y_End, Gamma = 2.4;
+    bool SRGB = true;
+    int Brightness;
 
     try
     {
-        PGM.file_read(input_file);
+        Brightness = atoi(argv[3]);
+        Thickness = stod(argv[4]);
+        X_Start = stod(argv[5]);
+        Y_Start = stod(argv[6]);
+        X_End = stod(argv[7]);
+        Y_End = stod(argv[8]);
     }
-
-    catch (IO_WARNING&)
+    catch (const exception& error)
     {
-        cerr << "Error while trying to read file " << input_file << '.' << endl;
+        cerr << error.what() << "\n";
         return 1;
     }
 
-    catch (FORMAT_WARNING& e)
+    if(argc == 10)
     {
-        cerr << e.what() << endl;
-        return 1;
+        try
+        {
+            Gamma = stod(argv[9]);
+            SRGB = false;
+        }
+        catch (const exception& error)
+        {
+            cerr << error.what() << endl;
+            return 1;
+        }
     }
 
+    PGM* Picture;
     try
     {
-        if (argc == 10)
-            PGM.draw_line(x_first, y_begin, x_end, y_end, Brightness, Thickness, GammaCorrection);
-        else
-            PGM.draw_line(x_first, y_begin, x_end, y_end, Brightness, Thickness, 0);
+        Picture = new PGM(Input);
     }
-
-    catch (exception& e)
+    catch (const exception& error)
     {
-        cerr << "Failed to draw a Line: " << e.what() << endl;
+        cerr << error.what() << "\n";
         return 1;
     }
 
-
+    Picture->DrawLine(NewPoint{ X_Start, Y_Start }, NewPoint{ X_End, Y_End }, Thickness, Brightness, Gamma, SRGB);
     try
     {
-        PGM.file_write(output_file);
+        Picture->WriteToFile(Output);
     }
-
-    catch (IO_WARNING&)
+    catch (const exception& error)
     {
-        cerr << "Error while trying to write data to file " << output_file << '.' << endl;
+        cerr << error.what() << "\n";
+        delete Picture;
         return 1;
     }
 
+    delete Picture;
     return 0;
 }
