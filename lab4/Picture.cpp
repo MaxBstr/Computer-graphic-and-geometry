@@ -11,7 +11,7 @@ vector<string> GetFiles(string Pattern)
         throw runtime_error("WARNING! Pattern has no dots, so can`t match name.ext");
 
     string FP = Pattern.substr(0, LastDot), SP = Pattern.substr(LastDot);
-    return { FP + "_" + to_string(1) + SP, FP + "_" + to_string(2) + SP, FP + "_" + to_string(3) + SP };
+    return { FP + "_" + "1" + SP, FP + "_" + "2" + SP, FP + "_" + "3" + SP };
 }
 
 PIC::PIC(int Count, string FName)
@@ -111,7 +111,7 @@ void PIC::WriteToFile(int Count, string FName)
 
         OutputFile << "P6\n" << Width << ' ' << Height << '\n' << ColorDepth << '\n';
 
-        for(int i = 0; i < Height; i++)
+        for(int i = 0; i < Height; i ++)
         {
             for (int j = 0; j < Width; j++)
             {
@@ -129,7 +129,7 @@ void PIC::WriteToFile(int Count, string FName)
         if(Files.size() != 3)
             throw runtime_error("WARNING! Error during name generation");
 
-        for(int k = 0; k < 3; k++)
+        for(int k = 0; k < 3; k ++)
         {
             ofstream OutputFile(Files[k], ios::binary);
             if(!OutputFile.is_open())
@@ -157,7 +157,7 @@ void PIC::WriteToFile(int Count, string FName)
 void PIC::ChangeSpace(string StartColorSpace, string EndColorSpace)
 {
     // convert RGB
-    for (int i = 0; i < Height; i++)
+    for (int i = 0; i < Height; i ++)
     {
         for (int j = 0; j < Width; j++)
         {
@@ -455,8 +455,7 @@ SomePixel FROM_YCgCo_TO_RGB(SomePixel PX)
     };
 }
 
-SomePixel FROM_RGB_TO_YCbCr601(SomePixel PX)
-{
+SomePixel FROM_RGB_TO_YCbCr601(SomePixel PX) {
     double R = PX.First / 255.0;
     double G = PX.Second / 255.0;
     double B = PX.Third / 255.0;
@@ -465,23 +464,23 @@ SomePixel FROM_RGB_TO_YCbCr601(SomePixel PX)
     double KG = 0.114;
 
     double Y = KR * R + KG * G + KB * B;
-    double CB = (B - Y) / (2 * (1 - KB));
-    double CR = (R - Y) / (2 * (1 - KR));
-    int RR = round(Y * 255), GG = round((CB + 0.5) * 255), BB = round((CR + 0.5) * 255);
+    double CB = (B - Y) / (2.0 * (1.0 - KB));
+    double CR = (R - Y) / (2.0 * (1.0 - KR));
+    int RR = (int) round(Y * 255), GG = (int) round((CB + 0.5) * 255), BB = (int) round((CR + 0.5) * 255);
 
-    if(RR < 0) RR = 0;
-    if(RR > 255) RR = 255;
-    if(BB < 0) BB = 0;
-    if(BB > 255) BB = 255;
-    if(GG < 0) GG = 0;
-    if(GG > 255) GG = 255;
+    if (RR < 0) RR = 0;
+    if (RR > 255) RR = 255;
+    if (BB < 0) BB = 0;
+    if (BB > 255) BB = 255;
+    if (GG < 0) GG = 0;
+    if (GG > 255) GG = 255;
 
     return SomePixel
-    {
-        (unsigned char)RR,
-        (unsigned char)GG,
-        (unsigned char)BB
-    };
+            {
+                    (unsigned char) RR,
+                    (unsigned char) GG,
+                    (unsigned char) BB
+            };
 }
 
 SomePixel FROM_YCbCr601_TO_RGB(SomePixel PX)
@@ -496,7 +495,7 @@ SomePixel FROM_YCbCr601_TO_RGB(SomePixel PX)
     double R = Y + (2.0 - 2.0 * KR) * CR;
     double G = Y - KB * (2.0 - 2.0 * KB) * CB / KG - KR * (2 - 2.0 * KR) * CR / KG;
     double B = Y + (2.0 - 2.0 * KB) * CB;
-    int RR = round(R * 255), GG = round(G * 255), BB = round(B * 255);
+    int RR = (int)round(R * 255), GG = (int)round(G * 255), BB = (int)round(B * 255);
 
     if(RR > 255) RR = 255;
     if(RR < 0) RR = 0;
