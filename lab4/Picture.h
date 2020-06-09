@@ -26,26 +26,26 @@ private:
     vector<vector<SomePixel>> Picture;
 };
 
-SomePixel CMY_TO_RGB(SomePixel PX);
+SomePixel FROM_CMY_TO_RGB(SomePixel PX);
 
-SomePixel RGB_TO_CMY(SomePixel PX);
+SomePixel FROM_RGB_TO_CMY(SomePixel PX);
 
-SomePixel HSL_TO_RGB(SomePixel PX);
+SomePixel FROM_HSL_TO_RGB(SomePixel PX);
 
-SomePixel RGB_TO_HSL(SomePixel PX);
+SomePixel FROM_RGB_TO_HSL(SomePixel PX);
 
-SomePixel HSV_TO_RGB(SomePixel PX);
+SomePixel FROM_HSV_TO_RGB(SomePixel PX);
 
-SomePixel RGB_TO_HSV(SomePixel PX);
+SomePixel FROM_RGB_TO_HSV(SomePixel PX);
 
-SomePixel YCgCo_TO_RGB(SomePixel PX);
+SomePixel FROM_YCgCo_TO_RGB(SomePixel PX);
 
-SomePixel RGB_TO_YCgCo(SomePixel PX);
+SomePixel FROM_RGB_TO_YCgCo(SomePixel PX);
 
-SomePixel RGB_TO_YCbCr601(SomePixel PX);
+SomePixel FROM_RGB_TO_YCbCr601(SomePixel PX);
 
-SomePixel YCbCr601_TO_RGB(SomePixel PX);
+SomePixel FROM_YCbCr601_TO_RGB(SomePixel PX);
 
-SomePixel RGB_TO_YCbCr709(SomePixel PX);
+SomePixel FROM_RGB_TO_YCbCr709(SomePixel PX);
 
-SomePixel YCbCr709_TO_RGB(SomePixel PX);
+SomePixel FROM_YCbCr709_TO_RGB(SomePixel PX);
