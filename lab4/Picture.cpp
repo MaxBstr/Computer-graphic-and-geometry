@@ -111,7 +111,7 @@ void PIC::WriteToFile(int Count, string FName)
 
         OutputFile << "P6\n" << Width << ' ' << Height << '\n' << ColorDepth << '\n';
 
-        for(int i = 0; i < Height; i ++)
+        for(int i = 0; i < Height; i++)
         {
             for (int j = 0; j < Width; j++)
             {
