@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     IsWarning |= StartColorSpace == "" || EndColorSpace == "" || FileInput == "" || FileOutput == "";
     IsWarning |= (InputCount != 1 && InputCount != 3);
     IsWarning |= (OutCount != 1 && OutCount != 3);
-    
+
     bool InSpaceDefined = false, OutSpaceDefined = false;
 
     for(int i = 0; i < ColorSpaces.size(); i++)
