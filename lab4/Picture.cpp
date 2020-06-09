@@ -172,7 +172,7 @@ void PIC::ChangeSpace(string StartColorSpace, string EndColorSpace)
                 Picture[i][j] = FROM_CMY_TO_RGB(Picture[i][j]);
 
             if (StartColorSpace == "YCoCg")
-                Picture[i][j] = FROM_YCgCo_TO_RGB(Picture[i][j]);
+                Picture[i][j] = FROM_YCoCg_TO_RGB(Picture[i][j]);
 
             if (StartColorSpace == "YCbCr.601")
                 Picture[i][j] = FROM_YCbCr601_TO_RGB(Picture[i][j]);
@@ -194,7 +194,7 @@ void PIC::ChangeSpace(string StartColorSpace, string EndColorSpace)
             if (EndColorSpace == "CMY")
                 Picture[i][j] = FROM_RGB_TO_CMY(Picture[i][j]);
             if (EndColorSpace == "YCoCg")
-                Picture[i][j] = FROM_RGB_TO_YCgCo(Picture[i][j]);
+                Picture[i][j] = FROM_RGB_TO_YCoCg(Picture[i][j]);
             if (EndColorSpace == "YCbCr.601")
                 Picture[i][j] = FROM_RGB_TO_YCbCr601(Picture[i][j]);
             if (EndColorSpace == "YCbCr.709")
@@ -407,7 +407,7 @@ SomePixel FROM_RGB_TO_CMY(SomePixel PX)
     };
 }
 
-SomePixel FROM_RGB_TO_YCgCo(SomePixel PX)
+SomePixel FROM_RGB_TO_YCoCg(SomePixel PX)
 {
     double R = PX.First * 1.0 / 255;
     double G = PX.Second * 1.0 / 255;
@@ -431,7 +431,7 @@ SomePixel FROM_RGB_TO_YCgCo(SomePixel PX)
     };
 }
 
-SomePixel FROM_YCgCo_TO_RGB(SomePixel PX)
+SomePixel FROM_YCoCg_TO_RGB(SomePixel PX)
 {
     double Y = PX.First * 1.0 / 255;
     double ChromaOrange = PX.Second * 1.0 / 255 - 0.5;
