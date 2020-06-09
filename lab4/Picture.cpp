@@ -163,22 +163,22 @@ void PIC::ChangeSpace(string StartColorSpace, string EndColorSpace)
         {
 
             if (StartColorSpace == "HSV")
-                Picture[i][j] = HSV_TO_RGB(Picture[i][j]);
+                Picture[i][j] = FROM_HSV_TO_RGB(Picture[i][j]);
 
             if (StartColorSpace == "HSL")
-                Picture[i][j] = HSL_TO_RGB(Picture[i][j]);
+                Picture[i][j] = FROM_HSL_TO_RGB(Picture[i][j]);
 
             if (StartColorSpace == "CMY")
-                Picture[i][j] = CMY_TO_RGB(Picture[i][j]);
+                Picture[i][j] = FROM_CMY_TO_RGB(Picture[i][j]);
 
             if (StartColorSpace == "YCoCg")
-                Picture[i][j] = YCgCo_TO_RGB(Picture[i][j]);
+                Picture[i][j] = FROM_YCgCo_TO_RGB(Picture[i][j]);
 
             if (StartColorSpace == "YCbCr.601")
-                Picture[i][j] = YCbCr601_TO_RGB(Picture[i][j]);
+                Picture[i][j] = FROM_YCbCr601_TO_RGB(Picture[i][j]);
 
             if (StartColorSpace == "YCbCr.709")
-                Picture[i][j] = YCbCr709_TO_RGB(Picture[i][j]);
+                Picture[i][j] = FROM_YCbCr709_TO_RGB(Picture[i][j]);
         }
     }
 
@@ -188,22 +188,22 @@ void PIC::ChangeSpace(string StartColorSpace, string EndColorSpace)
         for (int j = 0; j < Width; j++)
         {
             if (EndColorSpace == "HSL")
-                Picture[i][j] = RGB_TO_HSL(Picture[i][j]);
+                Picture[i][j] = FROM_RGB_TO_HSL(Picture[i][j]);
             if (EndColorSpace == "HSV")
-                Picture[i][j] = RGB_TO_HSV(Picture[i][j]);
+                Picture[i][j] = FROM_RGB_TO_HSV(Picture[i][j]);
             if (EndColorSpace == "CMY")
-                Picture[i][j] = RGB_TO_CMY(Picture[i][j]);
+                Picture[i][j] = FROM_RGB_TO_CMY(Picture[i][j]);
             if (EndColorSpace == "YCoCg")
-                Picture[i][j] = RGB_TO_YCgCo(Picture[i][j]);
+                Picture[i][j] = FROM_RGB_TO_YCgCo(Picture[i][j]);
             if (EndColorSpace == "YCbCr.601")
-                Picture[i][j] = RGB_TO_YCbCr601(Picture[i][j]);
+                Picture[i][j] = FROM_RGB_TO_YCbCr601(Picture[i][j]);
             if (EndColorSpace == "YCbCr.709")
-                Picture[i][j] = RGB_TO_YCbCr709(Picture[i][j]);
+                Picture[i][j] = FROM_RGB_TO_YCbCr709(Picture[i][j]);
         }
     }
 }
 
-SomePixel HSL_TO_RGB(SomePixel PX)
+SomePixel FROM_HSL_TO_RGB(SomePixel PX)
 {
     double Hue = PX.First / 255.0;
     double Saturation = PX.Second / 255.0;
@@ -271,7 +271,7 @@ SomePixel HSL_TO_RGB(SomePixel PX)
     };
 }
 
-SomePixel RGB_TO_HSL(SomePixel PX)
+SomePixel FROM_RGB_TO_HSL(SomePixel PX)
 {
     double R = PX.First * 1.0 / 255;
     double G = PX.Second * 1.0 / 255;
@@ -305,7 +305,7 @@ SomePixel RGB_TO_HSL(SomePixel PX)
     };
 }
 
-SomePixel HSV_TO_RGB(SomePixel PX)
+SomePixel FROM_HSV_TO_RGB(SomePixel PX)
 {
     double Hue = PX.First / 255.0 * 360.0;
     double Saturation = PX.Second / 255.0;
@@ -353,7 +353,7 @@ SomePixel HSV_TO_RGB(SomePixel PX)
     };
 }
 
-SomePixel RGB_TO_HSV(SomePixel PX)
+SomePixel FROM_RGB_TO_HSV(SomePixel PX)
 {
     double R = PX.First * 1.0 / 255;
     double G = PX.Second * 1.0 / 255;
@@ -389,7 +389,7 @@ SomePixel RGB_TO_HSV(SomePixel PX)
     };
 }
 
-SomePixel CMY_TO_RGB(SomePixel PX)
+SomePixel FROM_CMY_TO_RGB(SomePixel PX)
 {
     return SomePixel
     {(unsigned char)(255 - PX.First),
@@ -398,7 +398,7 @@ SomePixel CMY_TO_RGB(SomePixel PX)
     };
 }
 
-SomePixel RGB_TO_CMY(SomePixel PX)
+SomePixel FROM_RGB_TO_CMY(SomePixel PX)
 {
     return SomePixel
     {(unsigned char)(255 - PX.First),
@@ -407,7 +407,7 @@ SomePixel RGB_TO_CMY(SomePixel PX)
     };
 }
 
-SomePixel RGB_TO_YCgCo(SomePixel PX)
+SomePixel FROM_RGB_TO_YCgCo(SomePixel PX)
 {
     double R = PX.First * 1.0 / 255;
     double G = PX.Second * 1.0 / 255;
@@ -431,7 +431,7 @@ SomePixel RGB_TO_YCgCo(SomePixel PX)
     };
 }
 
-SomePixel YCgCo_TO_RGB(SomePixel PX)
+SomePixel FROM_YCgCo_TO_RGB(SomePixel PX)
 {
     double Y = PX.First * 1.0 / 255;
     double ChromaOrange = PX.Second * 1.0 / 255 - 0.5;
@@ -455,7 +455,7 @@ SomePixel YCgCo_TO_RGB(SomePixel PX)
     };
 }
 
-SomePixel RGB_TO_YCbCr601(SomePixel PX)
+SomePixel FROM_RGB_TO_YCbCr601(SomePixel PX)
 {
     double R = PX.First / 255.0;
     double G = PX.Second / 255.0;
@@ -484,7 +484,7 @@ SomePixel RGB_TO_YCbCr601(SomePixel PX)
     };
 }
 
-SomePixel YCbCr601_TO_RGB(SomePixel PX)
+SomePixel FROM_YCbCr601_TO_RGB(SomePixel PX)
 {
     double Y = PX.First / 255.0;
     double CB = PX.Second / 255.0 - 0.5;
@@ -513,7 +513,7 @@ SomePixel YCbCr601_TO_RGB(SomePixel PX)
     };
 }
 
-SomePixel RGB_TO_YCbCr709(SomePixel PX)
+SomePixel FROM_RGB_TO_YCbCr709(SomePixel PX)
 {
     double R = PX.First / 255.0;
     double G = PX.Second / 255.0;
@@ -542,7 +542,7 @@ SomePixel RGB_TO_YCbCr709(SomePixel PX)
     };
 }
 
-SomePixel YCbCr709_TO_RGB(SomePixel PX)
+SomePixel FROM_YCbCr709_TO_RGB(SomePixel PX)
 {
     double Y = PX.First / 255.0;
     double CB = PX.Second / 255.0 - 0.5;
