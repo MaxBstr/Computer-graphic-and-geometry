@@ -455,13 +455,14 @@ SomePixel FROM_YCoCg_TO_RGB(SomePixel PX)
     };
 }
 
-SomePixel FROM_RGB_TO_YCbCr601(SomePixel PX) {
+SomePixel FROM_RGB_TO_YCbCr601(SomePixel PX)
+{
     double R = PX.First / 255.0;
     double G = PX.Second / 255.0;
     double B = PX.Third / 255.0;
-    double KB = 0.299;
-    double KR = 0.587;
-    double KG = 0.114;
+    double KR = 0.2126;
+    double KG = 0.7152;
+    double KB = 0.0722;
 
     double Y = KR * R + KG * G + KB * B;
     double CB = (B - Y) / (2.0 * (1.0 - KB));
@@ -488,9 +489,9 @@ SomePixel FROM_YCbCr601_TO_RGB(SomePixel PX)
     double Y = PX.First / 255.0;
     double CB = PX.Second / 255.0 - 0.5;
     double CR = PX.Third / 255.0 - 0.5;
-    double KB = 0.299;
-    double KR = 0.587;
-    double KG = 0.114;
+    double KR = 0.299;
+    double KG = 0.587;
+    double KB = 0.114;
 
     double R = Y + (2.0 - 2.0 * KR) * CR;
     double G = Y - KB * (2.0 - 2.0 * KB) * CB / KG - KR * (2 - 2.0 * KR) * CR / KG;
