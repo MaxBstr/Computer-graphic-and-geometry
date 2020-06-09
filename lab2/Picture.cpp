@@ -1,184 +1,167 @@
 #include "Picture.h"
-#include <fstream>
-
 #include <cmath>
 #include <algorithm>
+#include <fstream>
 
-#define AREA Width * Height
-#define EPS 1e-5
 
-const short PGM = 5, COLOR_DEPTH = 255;
+double sqr(double a) { return a * a; }
 
-Picture::Picture() = default;
-Picture::~Picture() { Image.clear(); }
-
-void Picture::file_read(const string & f_name)
+double GetDistance(NewPoint p1, NewPoint p2) {
+    return sqrt(sqr(p1.x - p2.x) + sqr(p1.y - p2.y));
+}
+double TriangleSquare(NewPoint A, NewPoint B, NewPoint C)
 {
-    ifstream fin(f_name, ios::binary);
-    if (!fin.is_open())
-        throw IO_WARNING();
-
-    char P;
-    fin >> P;
-    if (P != 'P')
-        throw FORMAT_WARNING();
-    fin >> Format;
-
-    if (Format != PGM)
-        throw FORMAT_WARNING();
-
-    fin >> Width >> Height;
-    fin >> ColorDepth;
-    if (ColorDepth != COLOR_DEPTH)
-        throw FORMAT_WARNING();
-
-    fin.get();
-
-    Image.resize(AREA);
-    fin.read(reinterpret_cast<char*>(&Image[0]), AREA);
-
-    if (fin.fail())
-        throw IO_WARNING();
-
-    fin.close();
+    double a = GetDistance(A, B);
+    double b = GetDistance(B, C);
+    double c = GetDistance(C, A);
+    double p = (a + b + c) / 2;
+    return sqrt(p * (p - a) * (p - b) * (p - c));
 }
 
-void Picture::file_write(const string & f_name)
+bool PointInRectangle(NewPoint A, NewPoint B, NewPoint C, NewPoint D, NewPoint P)
 {
-    ofstream fout(f_name, ios::binary);
-    if (!fout.is_open())
-        throw IO_WARNING();
-
-    fout << "P" << Format << '\n';
-    fout << Width << ' ' << Height << '\n';
-    fout << ColorDepth << '\n';
-
-    fout.write(reinterpret_cast<char*>(&Image[0]), AREA);
-    if (fout.fail())
-        throw IO_WARNING();
-
-    fout.close();
+    const double RectHeight = GetDistance(A, B);
+    const double RectWidth = GetDistance(A, C);
+    const double RectSquare = RectHeight * RectWidth;
+    const double PossibleSize = TriangleSquare(P, A, B) + TriangleSquare(P, A, C) + TriangleSquare(P, C, D) + TriangleSquare(P, D, B);
+    return fabs(RectSquare - PossibleSize) < 1e-5;
 }
 
-void Picture::drawPoint(int X, int Y, double Alpha, unsigned char Color, double Gamma) {
-    Alpha = max(min(Alpha, 1.0), 0.0);
-    if (Y < 0 || Y >= Height || X < 0 || X >= Width)
-        return;
+double SquareIntersection(NewPoint A, NewPoint B, NewPoint C, NewPoint D, double x, double y)
+{
+    if (
+        PointInRectangle(A, B, C, D, NewPoint{x, y}) &&
+        PointInRectangle(A, B, C, D, NewPoint{x + 1.0, y * 1.0}) &&
+        PointInRectangle(A, B, C, D, NewPoint{x * 1.0, y + 1.0}) &&
+        PointInRectangle(A, B, C, D, NewPoint{x + 1.0, y + 1.0})
+        )
+        return 1.0;
 
-    if (Alpha == 0)
-        return;
+    int Ins = 0;
+    for(double i = x + 0.1; i + 0.1 <= x + 1; i += 0.1)
+        for(double j = y + 0.1; j + 0.1 <= y + 1; j += 0.1)
+            if(PointInRectangle(A, B, C, D, NewPoint{i, j}))
+                Ins++;
 
-    if (Gamma == 0)
+    return Ins * 1.0 / 100;
+}
+
+
+NewPoint::NewPoint(double x, double y)
+{
+    this->x = x;
+    this->y = y;
+}
+
+
+PGM::PGM(string FName)
+{
+    ifstream InputFile(FName, ios::binary);
+    if(!InputFile.is_open())
+        throw runtime_error("Failed to open file");
+
+    char Header[2];
+    InputFile >> Header[0] >> Header[1];
+    if(Header[0] != 'P' || Header[1] != '5')
+        throw runtime_error("Excepted not P5 format");
+
+    InputFile >> this->Width >> this->Height >> this->ColorDepth;
+    this->Picture.assign(this->Height, vector<unsigned char>(this->Width));
+
+    char PX;
+    InputFile.read(&PX, 1);
+
+    for (int i = 0; i < this->Height; i++)
     {
-        double LineColorSRGB = Color / 255.0; //коэффициент
-        double LineColorLinear = LineColorSRGB <= 0.04045 ? LineColorSRGB / 12.92 : pow((LineColorSRGB + 0.055) / 1.055, 2.4); //конвертация из srgb цвета линии в линейное
-        double PicColorSRGB = Image[Width * Y + X] / 255.0; //пиксель в srgb, получаем коэффициент
-        double PicColorLinear = PicColorSRGB <= 0.04045 ? PicColorSRGB / 12.92 : pow((PicColorSRGB + 0.055) / 1.055, 2.4); //перевод коэфа в линейный из srgb
-        double C_Linear = (1 - Alpha) * PicColorLinear + Alpha * LineColorLinear; //получение нового цвета пикселя, накладка 2х пикселей
-        double C_SRGB = C_Linear <= 0.0031308 ? 12.92 * C_Linear : 1.055 * pow(C_Linear, 1 / 2.4) - 0.055; //перевод в srgb
-        Image[Width * Y + X] = 255 * C_SRGB; //перевод из коэффа в палитру
+        for (int j = 0; j < this->Width; j++)
+        {
+            InputFile.read(&PX, sizeof(unsigned char));
+            this->Picture[i][j] = PX;
+        }
+    }
+    InputFile.close();
+}
+
+
+void PGM::WriteToFile(string FName)
+{
+    ofstream OutputFile(FName, ios::binary);
+    if(!OutputFile.is_open()) {
+        throw runtime_error("Output file did not open");
+    }
+
+    OutputFile << "P5\n" << Width << ' ' << Height << '\n' << ColorDepth << '\n';
+
+    for(int i = 0; i < Height; i ++)
+        for(int j = 0; j < Width; j ++)
+            OutputFile << (unsigned char)(Picture[i][j]);
+
+    OutputFile.flush();
+    OutputFile.close();
+}
+
+
+void PGM::MakePlot(int x, int y, double Brightness, int Color, double Gamma, bool SRGB)
+{
+    if (x < 0 || x >= this->Width || y < 0 || y >= this->Height || Brightness < 0)
+        return;
+
+    double PX = (double)(this->Picture[y][x]) / this->ColorDepth;
+    double ColorCorrect = Color * 1.0 / 255;
+
+    if (SRGB)
+    {
+        PX = (PX < 0.04045 ? PX / 12.92 : pow((PX + 0.055) / 1.055, Gamma));
+        ColorCorrect = (ColorCorrect < 0.04045 ? ColorCorrect / 12.92 : pow((ColorCorrect + 0.055) / 1.055, Gamma));
     }
     else
     {
-        double LineColorGamma = Color / 255.0; //коэффициент
-        double LineColorLinear = pow(LineColorGamma, Gamma); //получение линейного цвета
-        double PicColorGamma = Image[Width * Y + X] / 255.0; //коэффициент
-        double PicColorLinear = pow(PicColorGamma, Gamma); //получение линейного цвета
-        double C_Linear = (1 - Alpha) * PicColorLinear + Alpha * LineColorLinear; //наложение
-        double C_Gamma = pow(C_Linear, 1.0 / Gamma); //результирующий коэф
-        Image[Width * Y + X] = 255 * C_Gamma; //сам цвет
+        PX = pow(PX, Gamma);
+        ColorCorrect = pow(ColorCorrect, Gamma);
     }
+
+    PX *= (1.0 - Brightness);
+    PX += Brightness * ColorCorrect;
+
+    if(SRGB)
+        PX = (PX <= 0.0031308 ? PX * 12.92 : pow(PX, 1.0 / Gamma) * 1.055 - 0.055);
+    else
+        PX = pow(PX, 1.0 / Gamma);
+
+    if(PX >= 0.9999) PX = 1.0;
+    this->Picture[y][x] = (unsigned char)(this->ColorDepth * PX);
 }
 
-void Picture::draw_line(double X_First, double Y_First, double X_End, double Y_End, unsigned char Color, double Thickness, double Gamma)
+
+void PGM::DrawLine(NewPoint StartPoint, NewPoint EndPoint, double Thickness, int Color, double Gamma, bool SRGB)
 {
-
-    if (Thickness <= 0)
-        return;
-
-    StartPoint = { X_First, Y_First };
-    EndPoint   = { X_End, Y_End };
-
-    Point Vector = {(EndPoint.y - StartPoint.y) * 0.5 * Thickness / sqrt((EndPoint.y - StartPoint.y) * (EndPoint.y - StartPoint.y) + (StartPoint.x - EndPoint.x) * (StartPoint.x - EndPoint.x))
-            , (StartPoint.x - EndPoint.x) * 0.5 * Thickness / sqrt((EndPoint.y - StartPoint.y) * (EndPoint.y - StartPoint.y) + (StartPoint.x - EndPoint.x) * (StartPoint.x - EndPoint.x))};
-
-    Point A = {StartPoint.x + Vector.x, StartPoint.y + Vector.y};
-    Point B = {EndPoint.x + Vector.x, EndPoint.y + Vector.y};
-    Point C = {EndPoint.x - Vector.x, EndPoint.y - Vector.y};
-    Point D = {StartPoint.x - Vector.x, StartPoint.y - Vector.y};
-
-    Line = { A, B, C, D }; // vector Line
-    // drawing raster Line
-    Point LT{ min(min(A.x, B.x), min(C.x, D.x)), min(min(A.y, B.y), min(C.y, D.y)) };
-    Point RB{ max(max(A.x, B.x), max(C.x, D.x)), max(max(A.y, B.y), max(C.y, D.y)) };
-
-    for (int x = (int)LT.x - 3; x <= RB.x + 3; x++)
-        for (int y = (int)LT.y - 3; y <= RB.y + 3; y++)
-            drawPoint(x, y, Opacity(x, y), Color, Gamma);
-}
-
-double Picture::Opacity(double x, double y)
-{
-    Point A = { x, y } ;
-    Point B = { x + 1, y };
-    Point C = { x + 1, y + 1 };
-    Point D = { x, y + 1 };
-
-    auto CheckPoint = [](Rectangle Rectangle, Point p) -> bool
-            {
-        auto TriangleArea = [](Point A, Point B, Point C) -> double
-                {
-            return sqrt((
-                                (
-                                        sqrt((A.x - B.x) * (A.x - B.x) + (A.y - B.y) * (A.y - B.y)) +
-                                        sqrt((A.x - C.x) * (A.x - C.x) + (A.y - C.y) * (A.y - C.y)) + // p
-                                        sqrt((C.x - B.x) * (C.x - B.x) + (C.y - B.y) * (C.y - B.y))
-                                ) / 2
-                        ) * (
-                                (
-                                        -sqrt((A.x - B.x) * (A.x - B.x) + (A.y - B.y) * (A.y - B.y)) +
-                                        sqrt((A.x - C.x) * (A.x - C.x) + (A.y - C.y) * (A.y - C.y)) + // p - a
-                                        sqrt((C.x - B.x) * (C.x - B.x) + (C.y - B.y) * (C.y - B.y))
-                                ) / 2
-                        ) * (
-                                (
-                                        sqrt((A.x - B.x) * (A.x - B.x) + (A.y - B.y) * (A.y - B.y)) -
-                                        sqrt((A.x - C.x) * (A.x - C.x) + (A.y - C.y) * (A.y - C.y)) + // p - b
-                                        sqrt((C.x - B.x) * (C.x - B.x) + (C.y - B.y) * (C.y - B.y))
-                                ) / 2
-                        ) * (
-                                (
-                                        sqrt((A.x - B.x) * (A.x - B.x) + (A.y - B.y) * (A.y - B.y)) +
-                                        sqrt((A.x - C.x) * (A.x - C.x) + (A.y - C.y) * (A.y - C.y)) - // p - c
-                                        sqrt((C.x - B.x) * (C.x - B.x) + (C.y - B.y) * (C.y - B.y))
-                                ) / 2
-                        ));
-        };
-        return fabs
-        (
-                sqrt((Rectangle.A.x - Rectangle.D.x) * (Rectangle.A.x - Rectangle.D.x) +
-                     (Rectangle.A.y - Rectangle.D.y) * (Rectangle.A.y - Rectangle.D.y)) *
-                sqrt((Rectangle.A.x - Rectangle.B.x) * (Rectangle.A.x - Rectangle.B.x) +
-                     (Rectangle.A.y - Rectangle.B.y) * (Rectangle.A.y - Rectangle.B.y))
-                -
-                TriangleArea(p, Rectangle.A, Rectangle.B) - TriangleArea(p, Rectangle.B, Rectangle.C) -
-                TriangleArea(p, Rectangle.C, Rectangle.D) - TriangleArea(p, Rectangle.D, Rectangle.A)
-        ) < EPS;
-    };
-    if (
-            CheckPoint(Line, A) &&
-            CheckPoint(Line, B) &&
-            CheckPoint(Line, C) &&
-            CheckPoint(Line, D)
-        )
-        return 1;
-
-    double Area = 0;
-    for (double i = x; i < x + 1; i += 0.1)
+    if(StartPoint.x == EndPoint.x)
     {
-        for (double j = y; j < y + 1; j += 0.1)
-            if (CheckPoint(Line, { i, j }))
-                Area += 0.01;
+        StartPoint.x += 0.5;
+        EndPoint.x += 0.5;
     }
-    return Area;
+    if(StartPoint.y == EndPoint.y)
+    {
+        StartPoint.y += 0.5;
+        EndPoint.y += 0.5;
+    }
+
+    const NewPoint LineVector = {EndPoint.x - StartPoint.x, EndPoint.y - StartPoint.y};
+    NewPoint ThicknessVector = {1.0, 0.0};
+
+    if(LineVector.x != 0)
+        ThicknessVector = {-LineVector.y / LineVector.x, 1.0};
+
+    const double ThicknessCoefficient = sqrt((Thickness * Thickness / 4) / (ThicknessVector.x * ThicknessVector.x + ThicknessVector.y * ThicknessVector.y));
+
+    NewPoint A = {StartPoint.x + ThicknessCoefficient * ThicknessVector.x, StartPoint.y + ThicknessCoefficient * ThicknessVector.y};
+    NewPoint B = {StartPoint.x - ThicknessCoefficient * ThicknessVector.x, StartPoint.y - ThicknessCoefficient * ThicknessVector.y};
+    NewPoint C = {EndPoint.x + ThicknessCoefficient * ThicknessVector.x, EndPoint.y + ThicknessCoefficient * ThicknessVector.y};
+    NewPoint D = {EndPoint.x - ThicknessCoefficient * ThicknessVector.x, EndPoint.y - ThicknessCoefficient * ThicknessVector.y};
+
+    for(int i = max(0, int(min(min(A.x, B.x), min(C.x, D.x))) - 3); i < min(Width, int(max(max(A.x, B.x), max(C.x, D.x))) + 3); i++)
+    {
+        for (int j = max(0, int(min(min(A.y, B.y), min(C.y, D.y))) - 3); j < min(Height, int(max(max(A.y, B.y), max(C.y, D.y))) + 3); j++)
+            MakePlot(i, j, SquareIntersection(A, B, C, D, i, j), Color, Gamma, SRGB);
+    }
 }
