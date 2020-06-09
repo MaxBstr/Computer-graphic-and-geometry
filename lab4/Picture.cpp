@@ -460,9 +460,9 @@ SomePixel FROM_RGB_TO_YCbCr601(SomePixel PX)
     double R = PX.First / 255.0;
     double G = PX.Second / 255.0;
     double B = PX.Third / 255.0;
-    double KR = 0.2126;
-    double KG = 0.7152;
-    double KB = 0.0722;
+    double KR = 0.299;
+    double KG = 0.587;
+    double KB = 0.114;
 
     double Y = KR * R + KG * G + KB * B;
     double CB = (B - Y) / (2.0 * (1.0 - KB));
@@ -518,13 +518,14 @@ SomePixel FROM_RGB_TO_YCbCr709(SomePixel PX)
     double R = PX.First / 255.0;
     double G = PX.Second / 255.0;
     double B = PX.Third / 255.0;
-    double KB = 0.0722;
+
     double KR = 0.2126;
     double KG = 0.7152;
+    double KB = 0.0722;
 
     double Y = KR * R + KG * G + KB * B;
-    double CB = (B - Y) / (2 * (1 - KB));
-    double CR = (R - Y) / (2 * (1 - KR));
+    double CB = (B - Y) / (2.0 * (1.0 - KB));
+    double CR = (R - Y) / (2.0 * (1.0 - KR));
     int RR = round(Y * 255), GG = round((CB + 0.5) * 255), BB = round((CR + 0.5) * 255);
 
     if(RR < 0) RR = 0;
@@ -547,12 +548,14 @@ SomePixel FROM_YCbCr709_TO_RGB(SomePixel PX)
     double Y = PX.First / 255.0;
     double CB = PX.Second / 255.0 - 0.5;
     double CR = PX.Third / 255.0 - 0.5;
-    double KB = 0.0722;
+
     double KR = 0.2126;
     double KG = 0.7152;
-    double R = Y + (2 - 2 * KR) * CR;
-    double G = Y - KB * (2 - 2 * KB) * CB / KG - KR * (2 - 2 * KR) * CR / KG;
-    double B = Y + (2 - 2 * KB) * CB;
+    double KB = 0.0722;
+
+    double R = Y + (2.0 - 2.0 * KR) * CR;
+    double G = Y - KB * (2.0 - 2.0 * KB) * CB / KG - KR * (2.0 - 2.0 * KR) * CR / KG;
+    double B = Y + (2.0 - 2.0 * KB) * CB;
 
     int RR = round(R * 255), GG = round(G * 255), BB = round(B * 255);
     if(RR > 255) RR = 255;
