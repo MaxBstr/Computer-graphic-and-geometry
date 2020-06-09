@@ -150,8 +150,9 @@ double Image::EncodeGamma(double Value)
 void Image::UseGradient()
 {
     for (int i = 0; i < Height; ++i)
-        for (int j = 0; j < Width; ++j)
-            GetPixel(i, j) = EncodeGamma((double) j / (Width - 1.0)) * 255;
+        for (int j = 0; j < Width; ++j) 
+            GetPixel(i, j) = ((double) j / (Width - 1.0)) * 255;
+        
 }
 
 double Image::PaletteColorCount(uchar PX)
