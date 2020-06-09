@@ -460,6 +460,7 @@ SomePixel FROM_RGB_TO_YCbCr601(SomePixel PX)
     double R = PX.First / 255.0;
     double G = PX.Second / 255.0;
     double B = PX.Third / 255.0;
+    
     double KR = 0.299;
     double KG = 0.587;
     double KB = 0.114;
@@ -489,6 +490,7 @@ SomePixel FROM_YCbCr601_TO_RGB(SomePixel PX)
     double Y = PX.First / 255.0;
     double CB = PX.Second / 255.0 - 0.5;
     double CR = PX.Third / 255.0 - 0.5;
+    
     double KR = 0.299;
     double KG = 0.587;
     double KB = 0.114;
