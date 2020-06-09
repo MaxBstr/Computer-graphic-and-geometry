@@ -35,7 +35,7 @@ PIC::PIC(int Count, string FName)
         char PX;
         fin.read(&PX, 1);
 
-        for (int i = 0; i < Height; i ++)
+        for (int i = 0; i < Height; i++)
             for (int j = 0; j < Width; j ++)
             {
                 SomePixel CurrentPX;
