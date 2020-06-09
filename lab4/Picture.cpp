@@ -129,7 +129,7 @@ void PIC::WriteToFile(int Count, string FName)
         if(Files.size() != 3)
             throw runtime_error("WARNING! Error during name generation");
 
-        for(int k = 0; k < 3; k ++)
+        for(int k = 0; k < 3; k++)
         {
             ofstream OutputFile(Files[k], ios::binary);
             if(!OutputFile.is_open())
@@ -157,7 +157,7 @@ void PIC::WriteToFile(int Count, string FName)
 void PIC::ChangeSpace(string StartColorSpace, string EndColorSpace)
 {
     // convert RGB
-    for (int i = 0; i < Height; i ++)
+    for (int i = 0; i < Height; i++)
     {
         for (int j = 0; j < Width; j++)
         {
