@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <fstream>
 #include <cmath>
+#include <string>
 using namespace std;
 
 struct SomePixel
@@ -38,9 +39,9 @@ SomePixel FROM_HSV_TO_RGB(SomePixel PX);
 
 SomePixel FROM_RGB_TO_HSV(SomePixel PX);
 
-SomePixel FROM_YCgCo_TO_RGB(SomePixel PX);
+SomePixel FROM_YCoCg_TO_RGB(SomePixel PX);
 
-SomePixel FROM_RGB_TO_YCgCo(SomePixel PX);
+SomePixel FROM_RGB_TO_YCoCg(SomePixel PX);
 
 SomePixel FROM_RGB_TO_YCbCr601(SomePixel PX);
 
