@@ -39,8 +39,8 @@ void Picture::GetFile(string& FName)
     {
         case '5':
         {
-            char buf;
-            Input.read(&buf, 1);
+            char g;
+            Input.read(&g, 1);
             for (int i = 0; i < this->Height; ++i)
             {
                 for (int j = 0; j < this->Width; ++j)
@@ -152,27 +152,17 @@ void Picture::SetType(int Choice)
             UseType3();
             break;
         }
-        case 4:
-        {
-
-            break;
-        }
-        case 5:
-        {
-
-            break;
-        }
     }
 }
 
 uchar Picture::UseOffsetAndMultiplier(uchar Pixel)
 {
-    uchar buf = (Pixel - this->Offset) * this->Multiplier;
+    int buf = ((int)Pixel - this->Offset) * this->Multiplier;
     if(buf > 255)
         buf = 255;
     if (buf < 0)
         buf = 0;
-    return buf;
+    return (uchar)buf;
 }
 
 void Picture::UseType0() //0 - применить указанные значения <смещение> и <множитель> в пространстве RGB к каждому каналу;
@@ -206,28 +196,28 @@ void Picture::FROM_RGB_TO_YCbCr601()
             double Cr = (R - Y) / (2.0 * (1 - CoefR));
 
             //true colors
-            Y = round(Y * 255);
-            Cb = round ((Cb + 0.5) * 255);
-            Cr = round((Cr + 0.5) * 255);
+            int ResultY = (int)round(Y * 255);
+            int ResultCb = (int)round ((Cb + 0.5) * 255);
+            int ResultCr = (int)round((Cr + 0.5) * 255);
 
-            if (Y > 255)
-                Y = 255;
-            else if (Y < 255)
-                Y = 0;
+            if (ResultY > 255)
+                ResultY = 255;
+            if (ResultY < 0)
+                ResultY = 0;
 
-            if (Cb > 255)
-                Cb = 255;
-            else if (Cb < 255)
-                Cb = 0;
+            if (ResultCb > 255)
+                ResultCb = 255;
+            if (ResultCb < 0)
+                ResultCb = 0;
 
-            if (Cr > 255)
-                Cr = 255;
-            else if (Cr < 255)
-                Cr = 0;
+            if (ResultCr > 255)
+                ResultCr = 255;
+            if (ResultCr < 0)
+                ResultCr = 0;
 
-            Pixels[i][j].First = Y;
-            Pixels[i][j].Second = Cb;
-            Pixels[i][j].Third = Cr;
+            Pixels[i][j].First = (uchar)ResultY;
+            Pixels[i][j].Second = (uchar)ResultCb;
+            Pixels[i][j].Third = (uchar)ResultCr;
         }
 }
 void Picture::FROM_YCbCr601_TO_RGB()
@@ -239,37 +229,39 @@ void Picture::FROM_YCbCr601_TO_RGB()
     for (int i = 0; i < this->Height; ++i)
         for (int j = 0; j < this->Width; ++j)
         {
-            double Y = Pixels[i][j].First / 255.0 - 0.5;
+            double Y = Pixels[i][j].First / 255.0;
             double Cb = Pixels[i][j].Second / 255.0 - 0.5;
             double Cr = Pixels[i][j].Third / 255.0 - 0.5;
 
             double R = Y + Cr * (2.0 - 2.0 * CoefR);
-            double G = Y - (Cb * CoefB * (2.0 - 2.0 * CoefB)) / CoefG
-                    - (Cr * CoefR * (2.0 - 2.0 * CoefR)) / CoefG;
+            double G = Y - Cb * CoefB * (2.0 - 2.0 * CoefB) / CoefG
+                    - Cr * CoefR * (2.0 - 2.0 * CoefR) / CoefG;
             double B = Y + Cb * (2.0 - 2.0 * CoefB);
 
-            R = round(R * 255.0);
-            G = round(G * 255.0);
-            B = round(B * 255.0);
+            int ResultR = (int)round(R * 255.0);
+            int ResultG = (int)round(G * 255.0);
+            int ResultB = (int)round(B * 255.0);
 
-            if (R > 255)
-                R = 255;
-            else if (R < 0)
-                R = 0;
+            if (ResultR > 255)
+                ResultR = 255;
+            if (ResultR < 0)
+                ResultR = 0;
 
-            if (B > 255)
-                B = 255;
-            else if (B < 0)
-                B= 0;
+            if (ResultG > 255)
+                ResultG = 255;
+            if (ResultG < 0)
+                ResultG = 0;
 
-            if (G > 255)
-                G = 255;
-            else if (G < 0)
-                G = 0;
+            if (ResultB > 255)
+                ResultB = 255;
+            if (ResultB < 0)
+                ResultB= 0;
 
-            Pixels[i][j].First = R;
-            Pixels[i][j].Second = G;
-            Pixels[i][j].Third = B;
+
+
+            Pixels[i][j].First = (uchar)ResultR;
+            Pixels[i][j].Second = (uchar)ResultG;
+            Pixels[i][j].Third = (uchar)ResultB;
         }
 }
 void Picture::UseType1() //1 - применить указанные значения <смещение> и <множитель> в пространстве YCbCr.601 к каналу Y;
