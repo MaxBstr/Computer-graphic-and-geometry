@@ -3,7 +3,7 @@
 //lab.exe InputName, OutputName, type, offset, multiplier
 int main(int argc, char *argv[])
 {
-    if (argc != 6)
+    if (argc != 6 && argc != 4)
     {
         cerr << "Invalid command line args!";
         return 1;
