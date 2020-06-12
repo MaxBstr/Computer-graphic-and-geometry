@@ -28,7 +28,8 @@ void Picture::GetFile(string& FName)
         throw("Unknown format! Only for P5 or P6 format files");
 
     Input >> this->Width >> this->Height;
-    Pixels.assign(this->Height, vector<Pixel>(this->Height));
+    Pixels.assign(this->Height, vector<Pixel>(this->Width));
+
 
     Input >> this->ColorDepth;
     if(this->ColorDepth != 255)
@@ -38,7 +39,8 @@ void Picture::GetFile(string& FName)
     {
         case '5':
         {
-            char buf = Input.readsome(&buf, 1);
+            char buf;
+            Input.read(&buf, 1);
             for (int i = 0; i < this->Height; ++i)
             {
                 for (int j = 0; j < this->Width; ++j)
@@ -54,7 +56,8 @@ void Picture::GetFile(string& FName)
         }
         case '6':
         {
-            char buf = Input.readsome(&buf, 1);
+            char buf;
+            Input.read(&buf, 1);
             for (int i = 0; i < this->Height; ++i)
             {
                 for (int j = 0; j < this->Width; ++j)
