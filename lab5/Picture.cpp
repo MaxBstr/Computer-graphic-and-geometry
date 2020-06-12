@@ -32,7 +32,6 @@ void Picture::GetFile(string& FName)
 
     Pixels.assign(this->Height, vector<Pixel>(this->Width));
 
-
     Input >> this->ColorDepth;
     if(this->ColorDepth != 255)
         throw("Invalid ColorDepth! Must be equal 255");
@@ -162,7 +161,7 @@ uchar Picture::UseOffsetAndMultiplier(uchar Pixel)
 {
     int NewPx = (int)(((int)Pixel - this->Offset) * this->Multiplier);
 
-    if(NewPx > 255) NewPx = 255;
+    if (NewPx > 255) NewPx = 255;
     if (NewPx < 0) NewPx = 0;
 
     return (uchar)NewPx;
@@ -289,8 +288,8 @@ void Picture::UseType1() //1 - применить указанные значе�
 
 void Picture::UseType2() //2 - автояркость в пространстве RGB: <смещение> и <множитель> вычисляются на основе минимального и максимального значений пикселей;
 {
-    auto NewOffsetMIN = (uchar) 256;
-    auto NewMultiplierMAX = (uchar) 0;
+    int NewOffsetMIN = 255;
+    double NewMultiplierMAX = 0;
 
     for (int i = 0; i < this->Height; ++i)
         for (int j = 0; j < this->Width; ++j) {
@@ -330,8 +329,8 @@ void Picture::UseType2() //2 - автояркость в пространств�
 void Picture::UseType3() //3 - аналогично 2 в пространстве YCbCr.601;
 {
     FROM_RGB_TO_YCbCr601();
-    auto NewOffsetMIN = (uchar) 256;
-    auto NewMultiplierMAX = (uchar) 0;
+    int NewOffsetMIN = 255;
+    double NewMultiplierMAX = 0;
 
 
         for (int i = 0; i < this->Height; ++i)
