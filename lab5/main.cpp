@@ -3,7 +3,7 @@
 //lab.exe InputName, OutputName, type, offset, multiplier
 int main(int argc, char *argv[])
 {
-    if (argc != 6 && argc != 4)
+    if (argc != 6)
     {
         cerr << "Invalid command line args!";
         return 1;
@@ -14,6 +14,17 @@ int main(int argc, char *argv[])
     int Choice = atoi(argv[3]);
     double Offset = atof(argv[4]);
     double Multiplier = atof(argv[5]);
+
+    if (Offset < -255 || Offset > 255)
+    {
+        cerr << "Invalid offset! Must be in [-255; 255]";
+        return 1;
+    }
+    if (Multiplier < 1.0 / 255.0 || Multiplier > 255)
+    {
+        cerr << "Invalid multiplier! Must be in [1/255; 255]";
+        return 1;
+    }
 
     Picture* IMG = new Picture;
     try
@@ -30,8 +41,6 @@ int main(int argc, char *argv[])
     //1 - применить указанные значения <смещение> и <множитель> в пространстве YCbCr.601 к каналу Y;
     //2 - автояркость в пространстве RGB: <смещение> и <множитель> вычисляются на основе минимального и максимального значений пикселей;
     //3 - аналогично 2 в пространстве YCbCr.601;
-    //4 - автояркость в пространстве RGB: <смещение> и <множитель> вычисляются на основе минимального и максимального значений пикселей, после игнорирования 0.39% самых светлых и тёмных пикселей;
-    //5 - аналогично 4 в пространстве YCbCr.601.
 
         switch (Choice)
         {
