@@ -8,7 +8,6 @@ Picture::Picture()
     this->ColorDepth = 0;
     this->Multiplier = 0;
     this->Offset = 0;
-    this->type = -1;
     this->P = 0;
 }
 
@@ -28,6 +27,9 @@ void Picture::GetFile(string& FName)
         throw("Unknown format! Only for P5 or P6 format files");
 
     Input >> this->Width >> this->Height;
+    if (this->Width < 0 || this->Height < 0)
+        throw("Broken file! Negative sizes");
+
     Pixels.assign(this->Height, vector<Pixel>(this->Width));
 
 
@@ -39,25 +41,25 @@ void Picture::GetFile(string& FName)
     {
         case '5':
         {
-            char g;
-            Input.read(&g, 1);
+            char space; //лишний пиксель '\n'
+            Input.read(&space, 1);
             for (int i = 0; i < this->Height; ++i)
             {
                 for (int j = 0; j < this->Width; ++j)
                 {
-                    char buf;
-                    Input.read(&buf, sizeof(char));
-                    Pixels[i][j].First = buf;
-                    Pixels[i][j].Second = buf;
-                    Pixels[i][j].Third = buf;
+                    char CurPx;
+                    Input.read(&CurPx, sizeof(char));
+                    Pixels[i][j].First = CurPx;
+                    Pixels[i][j].Second = CurPx;
+                    Pixels[i][j].Third = CurPx;
                 }
             }
             break;
         }
         case '6':
         {
-            char buf;
-            Input.read(&buf, 1);
+            char space; //лишний пиксель '\n'
+            Input.read(&space, 1);
             for (int i = 0; i < this->Height; ++i)
             {
                 for (int j = 0; j < this->Width; ++j)
@@ -129,8 +131,7 @@ void Picture::SetParams(double Offset, double Multiplier)
 
 void Picture::SetType(int Choice)
 {
-    this->type = Choice;
-    switch(this->type)
+    switch(Choice)
     {
         case 0:
         {
@@ -157,12 +158,14 @@ void Picture::SetType(int Choice)
 
 uchar Picture::UseOffsetAndMultiplier(uchar Pixel)
 {
-    int buf = ((int)Pixel - this->Offset) * this->Multiplier;
-    if(buf > 255)
-        buf = 255;
-    if (buf < 0)
-        buf = 0;
-    return (uchar)buf;
+    int NewPx = ((int)Pixel - this->Offset) * this->Multiplier;
+
+    if(NewPx > 255)
+        NewPx = 255;
+    if (NewPx < 0)
+        NewPx = 0;
+
+    return (uchar)NewPx;
 }
 
 void Picture::UseType0() //0 - применить указанные значения <смещение> и <множитель> в пространстве RGB к каждому каналу;
@@ -257,8 +260,6 @@ void Picture::FROM_YCbCr601_TO_RGB()
             if (ResultB < 0)
                 ResultB= 0;
 
-
-
             Pixels[i][j].First = (uchar)ResultR;
             Pixels[i][j].Second = (uchar)ResultG;
             Pixels[i][j].Third = (uchar)ResultB;
@@ -284,7 +285,7 @@ void Picture::UseType2() //2 - автояркость в пространств�
             //ищем смещение и множитель
             if (Pixels[i][j].First > NewMultiplierMAX)
                 NewMultiplierMAX = Pixels[i][j].First;
-            if (Pixels[i][j].Second < NewOffsetMIN)
+            if (Pixels[i][j].First < NewOffsetMIN)
                 NewOffsetMIN = Pixels[i][j].First;
 
             if (Pixels[i][j].Second > NewMultiplierMAX)
@@ -320,7 +321,7 @@ void Picture::UseType3() //3 - аналогично 2 в пространств�
             //ищем смещение и множитель
             if (Pixels[i][j].First > NewMultiplierMAX)
                 NewMultiplierMAX = Pixels[i][j].First;
-            if (Pixels[i][j].Second < NewOffsetMIN)
+            if (Pixels[i][j].First < NewOffsetMIN)
                 NewOffsetMIN = Pixels[i][j].First;
 
             if (Pixels[i][j].Second > NewMultiplierMAX)
