@@ -172,9 +172,9 @@ void Picture::UseType0() //0 - применить указанные значе�
     for (int i = 0; i < this->Height; ++i)
         for (int j = 0; j < this->Width; ++j)
         {
-            Pixels[i][j].First = UseOffsetAndMultiplier(Pixels[i][j].First);
-            Pixels[i][j].Second = UseOffsetAndMultiplier(Pixels[i][j].Second);
-            Pixels[i][j].Third = UseOffsetAndMultiplier(Pixels[i][j].Third);
+            this->Pixels[i][j].First = UseOffsetAndMultiplier(this->Pixels[i][j].First);
+            this->Pixels[i][j].Second = UseOffsetAndMultiplier(this->Pixels[i][j].Second);
+            this->Pixels[i][j].Third = UseOffsetAndMultiplier(this->Pixels[i][j].Third);
         }
 }
 void Picture::FROM_RGB_TO_YCbCr601()
@@ -217,9 +217,9 @@ void Picture::FROM_RGB_TO_YCbCr601()
             if (ResultCr < 0)
                 ResultCr = 0;
 
-            Pixels[i][j].First = (uchar)ResultY;
-            Pixels[i][j].Second = (uchar)ResultCb;
-            Pixels[i][j].Third = (uchar)ResultCr;
+            this->Pixels[i][j].First = (uchar)ResultY;
+            this->Pixels[i][j].Second = (uchar)ResultCb;
+            this->Pixels[i][j].Third = (uchar)ResultCr;
         }
 }
 void Picture::FROM_YCbCr601_TO_RGB()
@@ -231,9 +231,9 @@ void Picture::FROM_YCbCr601_TO_RGB()
     for (int i = 0; i < this->Height; ++i)
         for (int j = 0; j < this->Width; ++j)
         {
-            double Y = Pixels[i][j].First / 255.0;
-            double Cb = Pixels[i][j].Second / 255.0 - 0.5;
-            double Cr = Pixels[i][j].Third / 255.0 - 0.5;
+            double Y = this->Pixels[i][j].First / 255.0;
+            double Cb = this->Pixels[i][j].Second / 255.0 - 0.5;
+            double Cr = this->Pixels[i][j].Third / 255.0 - 0.5;
 
             double R = Y + Cr * (2.0 - 2.0 * CoefR);
             double G = Y - Cb * CoefB * (2.0 - 2.0 * CoefB) / CoefG
