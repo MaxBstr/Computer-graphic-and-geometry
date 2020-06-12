@@ -19,7 +19,8 @@ private:
     int Height, Width, ColorDepth;
     vector <vector<Pixel>> Pixels;
     char P, FormatNum;
-    double Offset, Multiplier; //смещение и множитель
+    double Multiplier; //смещение и множитель
+    int Offset;
     uchar UseOffsetAndMultiplier(uchar Pixel);
     void FROM_RGB_TO_YCbCr601();
     void FROM_YCbCr601_TO_RGB();
@@ -33,7 +34,7 @@ public:
     ~Picture();
     void GetFile(string& FName);
     void WriteFile(string& FName);
-    void SetParams(double Offset, double Multiplier);
+    void SetParams(int Offset, double Multiplier);
     void SetType(int Choice);
     void WriteParamsConsole();
 };
