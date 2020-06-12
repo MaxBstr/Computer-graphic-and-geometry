@@ -289,8 +289,8 @@ void Picture::UseType1() //1 - применить указанные значе�
 
 void Picture::UseType2() //2 - автояркость в пространстве RGB: <смещение> и <множитель> вычисляются на основе минимального и максимального значений пикселей;
 {
-    auto NewOffsetMIN = (uchar) 0;
-    auto NewMultiplierMAX = (uchar) 256;
+    auto NewOffsetMIN = (uchar) 256;
+    auto NewMultiplierMAX = (uchar) 0;
 
     for (int i = 0; i < this->Height; ++i)
         for (int j = 0; j < this->Width; ++j) {
@@ -330,8 +330,8 @@ void Picture::UseType2() //2 - автояркость в пространств�
 void Picture::UseType3() //3 - аналогично 2 в пространстве YCbCr.601;
 {
     FROM_RGB_TO_YCbCr601();
-    auto NewOffsetMIN = (uchar)0;
-    auto NewMultiplierMAX = (uchar)256;
+    auto NewOffsetMIN = (uchar) 256;
+    auto NewMultiplierMAX = (uchar) 0;
 
     if (this->FormatNum == '5')
     {
