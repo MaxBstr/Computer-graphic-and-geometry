@@ -123,7 +123,7 @@ void Picture::WriteParamsConsole()
     cout << "Multiplier: " << this->Multiplier << endl;
 }
 
-void Picture::SetParams(double Offset, double Multiplier)
+void Picture::SetParams(int Offset, double Multiplier)
 {
     this->Offset = Offset;
     this->Multiplier = Multiplier;
@@ -153,6 +153,8 @@ void Picture::SetType(int Choice)
             UseType3();
             break;
         }
+        default:
+            break;
     }
 }
 
