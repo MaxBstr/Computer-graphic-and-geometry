@@ -16,7 +16,7 @@ struct Pixel
 class Picture
 {
 private:
-    int Height, Width, ColorDepth, type;
+    int Height, Width, ColorDepth;
     vector <vector<Pixel>> Pixels;
     char P, FormatNum;
     double Offset, Multiplier; //смещение и множитель
