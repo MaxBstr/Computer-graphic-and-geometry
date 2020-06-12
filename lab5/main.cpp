@@ -12,8 +12,8 @@ int main(int argc, char *argv[])
     string InputName = argv[1];
     string OutPutName = argv[2];
     int Choice = atoi(argv[3]);
-    double Offset = atoi(argv[4]);
-    double Multiplier = atoi(argv[5]);
+    double Offset = atof(argv[4]);
+    double Multiplier = atof(argv[5]);
 
     Picture* IMG = new Picture;
     try
@@ -56,18 +56,6 @@ int main(int argc, char *argv[])
             case 3:
             {
                 IMG->SetType(3);
-                IMG->WriteParamsConsole();
-                break;
-            }
-            case 4:
-            {
-                IMG->SetType(4);
-                IMG->WriteParamsConsole();
-                break;
-            }
-            case 5:
-            {
-                IMG->SetType(5);
                 IMG->WriteParamsConsole();
                 break;
             }
