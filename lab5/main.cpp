@@ -3,27 +3,43 @@
 //lab.exe InputName, OutputName, type, offset, multiplier
 int main(int argc, char *argv[])
 {
-    if (argc != 6)
+    if (argc < 4) //минимум 4 параметра: lab5.exe input output choice
     {
         cerr << "Invalid command line args!";
         return 1;
     }
+    double Multiplier = 0;
+    int Offset = 0;
 
     string InputName = argv[1];
     string OutPutName = argv[2];
     int Choice = atoi(argv[3]);
-    double Offset = atof(argv[4]);
-    double Multiplier = atof(argv[5]);
-
-    if (Offset < -255 || Offset > 255)
+    if (Choice > 3)
     {
-        cerr << "Invalid offset! Must be in [-255; 255]";
+        cerr << "This programm doesn`t support types > 3!" << endl;
         return 1;
     }
-    if (Multiplier < 1.0 / 255.0 || Multiplier > 255)
+
+    if (Choice <= 1) //если преобразование 0 или 1, обязательно должны быть offset, multiplier
     {
-        cerr << "Invalid multiplier! Must be in [1/255; 255]";
-        return 1;
+        if (argc < 6)
+        {
+            cerr << "You chose 0 or 1 type, but didn`t set offset and multiplier!" << endl;
+            return 1;
+        }
+        Offset = atof(argv[4]);
+        Multiplier = atof(argv[5]);
+
+        if (Offset < -255 || Offset > 255)
+        {
+            cerr << "Invalid offset! Must be in [-255; 255]";
+            return 1;
+        }
+        if (Multiplier < 1.0 / 255.0 || Multiplier > 255)
+        {
+            cerr << "Invalid multiplier! Must be in [1/255; 255]";
+            return 1;
+        }
     }
 
     Picture* IMG = new Picture;
