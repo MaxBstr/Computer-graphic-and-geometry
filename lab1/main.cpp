@@ -1,4 +1,14 @@
- 0;
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+struct RGB
+{
+	unsigned char Red = 0;
+	unsigned char Green = 0;
 	unsigned char Blue = 0;
 };
 
