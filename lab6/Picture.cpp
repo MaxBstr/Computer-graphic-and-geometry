@@ -269,7 +269,7 @@ void Picture::BCSplines()
             if (Result < 0)
                 Result = 0;
 
-            Buffer[(int)floor(y)][x] = Result;
+            Buffer[(int)floor(y)][x] = (uchar)Result;
         }
     }
 
