@@ -285,39 +285,42 @@ void Picture::UseType1() //1 - применить указанные значе�
     }
     FROM_YCbCr601_TO_RGB();
 }
-
+/*
 void Picture::UseType2() //2 - автояркость в пространстве RGB: <смещение> и <множитель> вычисляются на основе минимального и максимального значений пикселей;
 {
-    int NewOffsetMIN = 255;
-    double NewMultiplierMAX = 0;
+    uchar MIN = 255;
+    uchar MAX = 0;
 
     if(this->FormatNum == '6') //если цветное
     {
         for (int i = 0; i < this->Height; ++i)
+        {
             for (int j = 0; j < this->Width; ++j)
             {
                 //ищем смещение и множитель среди всех каналов
-                if (this->Pixels[i][j].First > NewMultiplierMAX)
-                    NewMultiplierMAX = this->Pixels[i][j].First;
-                if (this->Pixels[i][j].First < NewOffsetMIN)
-                    NewOffsetMIN = this->Pixels[i][j].First;
+                if (this->Pixels[i][j].First > MAX)
+                    MAX = this->Pixels[i][j].First;
+                if (this->Pixels[i][j].First < MIN)
+                    MIN = this->Pixels[i][j].First;
 
-                if (this->Pixels[i][j].Second > NewMultiplierMAX)
-                    NewMultiplierMAX = this->Pixels[i][j].Second;
-                if (this->Pixels[i][j].Second < NewOffsetMIN)
-                    NewOffsetMIN = this->Pixels[i][j].Second;
+                if (this->Pixels[i][j].Second > MAX)
+                    MAX = this->Pixels[i][j].Second;
+                if (this->Pixels[i][j].Second < MIN)
+                    MIN = this->Pixels[i][j].Second;
 
-                if (this->Pixels[i][j].Third > NewMultiplierMAX)
-                    NewMultiplierMAX = this->Pixels[i][j].Third;
-                if (this->Pixels[i][j].Third < NewOffsetMIN)
-                    NewOffsetMIN = this->Pixels[i][j].Third;
+                if (this->Pixels[i][j].Third > MAX)
+                    MAX = this->Pixels[i][j].Third;
+                if (this->Pixels[i][j].Third < MIN)
+                    MIN = this->Pixels[i][j].Third;
             }
+        }
         //нашли минимум и максимум
         //Offset = MIN;
         //Multiplier = 255.0 / (max-min);
-        NewMultiplierMAX = 255.0 / (NewMultiplierMAX - NewOffsetMIN);
-        this->Offset = NewOffsetMIN;
-        this->Multiplier = NewMultiplierMAX;
+        int NewOffset = MIN;
+        double NewMultiplier = (double)(255.0 / ((int)MAX - (int)NewOffset));
+        this->Offset = MIN;
+        this->Multiplier = NewMultiplier;
 
         for (int i = 0; i < this->Height; ++i)
             for (int j = 0; j < this->Width; ++j)
@@ -333,47 +336,111 @@ void Picture::UseType2() //2 - автояркость в пространств�
             for (int j = 0; j < this->Width; ++j)
             {
                 //ищем смещение и множитель среди 1 канала, т.к. 2 и 3 совпадают с 1
-                if (this->Pixels[i][j].First > NewMultiplierMAX)
-                    NewMultiplierMAX = this->Pixels[i][j].First;
-                if (this->Pixels[i][j].First < NewOffsetMIN)
-                    NewOffsetMIN = this->Pixels[i][j].First;
+                if (this->Pixels[i][j].First > MAX)
+                    MAX = this->Pixels[i][j].First;
+                if (this->Pixels[i][j].First < MIN)
+                    MIN = this->Pixels[i][j].First;
             }
         //нашли минимум и максимум
         //Offset = MIN;
         //Multiplier = 255.0 / (max-min);
-        NewMultiplierMAX = 255.0 / (NewMultiplierMAX - NewOffsetMIN);
-        this->Offset = NewOffsetMIN;
-        this->Multiplier = NewMultiplierMAX;
+        int NewOffset = MAX;
+        double NewMultiplier = (double)(255.0 / ((int)MAX - (int)NewOffset));
+        this->Offset = MIN;
+        this->Multiplier = NewMultiplier;
 
         for (int i = 0; i < this->Height; ++i)
             for (int j = 0; j < this->Width; ++j)
                 this->Pixels[i][j].First = UseOffsetAndMultiplier(this->Pixels[i][j].First);
     }
+}*/
+
+void Picture::UseType2()
+{
+    uchar MIN = 255;
+    uchar MAX = 0;
+
+    if (FormatNum == '6') //если цветное, ищем смещение и множители по всем каналам
+    {
+        for (int i = 0; i < this->Height; ++i)
+        {
+            for (int j = 0; j < this->Width; ++j)
+            {
+                //ищем смещение и множитель среди всех каналов
+                if (this->Pixels[i][j].First > MAX)
+                    MAX = this->Pixels[i][j].First;
+                if (this->Pixels[i][j].First < MIN)
+                    MIN = this->Pixels[i][j].First;
+
+                if (this->Pixels[i][j].Second > MAX)
+                    MAX = this->Pixels[i][j].Second;
+                if (this->Pixels[i][j].Second < MIN)
+                    MIN = this->Pixels[i][j].Second;
+
+                if (this->Pixels[i][j].Third > MAX)
+                    MAX = this->Pixels[i][j].Third;
+                if (this->Pixels[i][j].Third < MIN)
+                    MIN = this->Pixels[i][j].Third;
+            }
+        }
+    }
+    else //если черно-белое, только по 1 каналу
+    {
+        for (int i = 0; i < this->Height; ++i)
+        {
+            for (int j = 0; j < this->Width; ++j)
+            {
+                //ищем смещение и множитель среди всех каналов
+                if (this->Pixels[i][j].First > MAX)
+                    MAX = this->Pixels[i][j].First;
+                if (this->Pixels[i][j].First < MIN)
+                    MIN = this->Pixels[i][j].First;
+            }
+        }
+    }
+    //нашли минимум и максимум
+    //Offset = MIN;
+    //Multiplier = 255.0 / (max-min);
+    /*
+    int NewOffset = MIN;
+    auto NewMultiplier = (double)(255.0 / ((int)MAX - (int)NewOffset));
+    this->Offset = MIN;
+    this->Multiplier = NewMultiplier;*/
+    this->Offset = (int) MIN;
+    this->Multiplier = 255.0 / ((int)MAX - (int)MIN); //преобразовываем в int MAX & MIN, что не страшно
+
+    for (int i = 0; i < this->Height; ++i)
+    {
+        for (int j = 0; j < this->Width; ++j)
+        {
+            this->Pixels[i][j].First = UseOffsetAndMultiplier(this->Pixels[i][j].First);
+            this->Pixels[i][j].Second = UseOffsetAndMultiplier(this->Pixels[i][j].Second);
+            this->Pixels[i][j].Third = UseOffsetAndMultiplier(this->Pixels[i][j].Third);
+        }
+    }
 }
-
-
 void Picture::UseType3() //3 - аналогично 2 в пространстве YCbCr.601;
 {
     FROM_RGB_TO_YCbCr601();
-    int NewOffsetMIN = 255;
-    double NewMultiplierMAX = 0;
+    uchar MIN = 255;
+    uchar MAX = 0;
 
         for (int i = 0; i < this->Height; ++i)
             for (int j = 0; j < this->Width; ++j)
             {
                 //ищем смещение и множитель среди Y канала
-                if (this->Pixels[i][j].First > NewMultiplierMAX)
-                    NewMultiplierMAX = this->Pixels[i][j].First;
-                if (this->Pixels[i][j].First < NewOffsetMIN)
-                    NewOffsetMIN = this->Pixels[i][j].First;
+                if (this->Pixels[i][j].First > MAX)
+                    MAX = this->Pixels[i][j].First;
+                if (this->Pixels[i][j].First < MIN)
+                    MIN = this->Pixels[i][j].First;
 
             }
         //нашли минимум и максимум
         //Offset = MIN;
         //Multiplier = 255.0 / (max-min);
-        NewMultiplierMAX = 255.0 / (NewMultiplierMAX - NewOffsetMIN);
-        this->Offset = NewOffsetMIN;
-        this->Multiplier = NewMultiplierMAX;
+        //MAX = (double)(255.0 / ((int)MAX - (int)MIN));
+        this->Offset = MIN;
+        this->Multiplier = 255.0 / ((int)MAX - (int)MIN);;
 
     if (this->FormatNum == '5') //если черно-белое
     {
