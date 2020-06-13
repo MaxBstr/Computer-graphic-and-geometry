@@ -159,7 +159,7 @@ void Picture::SetType(int Choice)
 
 uchar Picture::UseOffsetAndMultiplier(uchar Pixel)
 {
-    int NewPx = (int)(((int)Pixel - this->Offset) * this->Multiplier);
+    int NewPx = (int)(((double)Pixel - this->Offset) * this->Multiplier);
 
     if (NewPx > 255) NewPx = 255;
     if (NewPx < 0) NewPx = 0;
@@ -187,9 +187,9 @@ void Picture::FROM_RGB_TO_YCbCr601()
         for (int j = 0; j < this->Width; ++j)
         {
             //R G B must be in [0; 1]
-            double R = Pixels[i][j].First / 255.0;
-            double G = Pixels[i][j].Second / 255.0;
-            double B = Pixels[i][j].Third / 255.0;
+            double R = this->Pixels[i][j].First / 255.0;
+            double G = this->Pixels[i][j].Second / 255.0;
+            double B = this->Pixels[i][j].Third / 255.0;
 
             //Y must be in [0; 1]
             double Y = CoefR * R + CoefG * G + CoefB * B;
@@ -390,7 +390,7 @@ void Picture::UseType2()
         {
             for (int j = 0; j < this->Width; ++j)
             {
-                //ищем смещение и множитель только по 1 каналу
+                //ищем смещение и множитель среди 1 канала
                 if (this->Pixels[i][j].First > MAX)
                     MAX = this->Pixels[i][j].First;
                 if (this->Pixels[i][j].First < MIN)
