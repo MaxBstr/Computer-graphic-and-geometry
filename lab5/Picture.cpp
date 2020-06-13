@@ -390,7 +390,7 @@ void Picture::UseType2()
         {
             for (int j = 0; j < this->Width; ++j)
             {
-                //ищем смещение и множитель среди всех каналов
+                //ищем смещение и множитель только по 1 каналу
                 if (this->Pixels[i][j].First > MAX)
                     MAX = this->Pixels[i][j].First;
                 if (this->Pixels[i][j].First < MIN)
