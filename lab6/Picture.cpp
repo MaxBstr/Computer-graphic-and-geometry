@@ -8,13 +8,17 @@ Picture::Picture(double B, double C, int NewWidth, int NewHeight)
     this->NewHeight = NewHeight;
 }
 
-Picture::~Picture() { PixelsOld.clear(); }
+Picture::~Picture()
+{
+    PixelsOld.clear();
+    PixelsNew.clear();
+}
 
 void Picture::GetFile(string& FName)
 {
     ifstream Input(FName, ios::binary);
     if (!Input.is_open())
-        throw runtime_error("Filed to open input file!");
+        throw runtime_error("Failed to open input file!");
 
     Input >> this->P >> this->FormatNum;
     if(P != 'P' || FormatNum != '5')
@@ -66,7 +70,7 @@ void Picture::SetType(int TypeAlgo)
 {
     //0 - ближайший сосед
     //1 - билинейная интерполяция
-    //2 - Lanczos3
+    //2 - Ланцош
     //3 - BC - сплайны
     switch(TypeAlgo)
     {
@@ -185,9 +189,9 @@ double Picture::LanczoshFilter(double Value) //фильтр Ланцоша (L)
 
 void Picture::Lanczos3()
 {
-    for (int x = 0; x < this->NewWidth; ++x) //x = cur_x
+    for (int i = 0; i < this->NewWidth; ++i) //i = cur_x
     {
-        for (int y = 0; y < this->NewHeight; ++y) //y = cur_y
+        for (int j = 0; j < this->NewHeight; ++j) //j = cur_y
         {
             int a = 3;
             double Result = 0;
@@ -195,12 +199,12 @@ void Picture::Lanczos3()
             double CoefWidth = (double)this->Width / (double)this->NewWidth;
 
             //оконная функция
-            for (int i = y * CoefHeight - a + 1; i < y * CoefHeight + a; i += 1.0)
+            for (int k = j * CoefHeight - a + 1; k < j * CoefHeight + a; k += 1.0)
             {
-                for (int j = x * CoefWidth - a + 1; j < x * CoefWidth + a; j += 1.0)
+                for (int z = i * CoefWidth - a + 1; z < i * CoefWidth + a; z += 1.0)
                 {
                     //окно не должно выходить за картинку
-                    int dy = i, dx = j;
+                    int dy = k, dx = z;
                     /*if (dx >= this->Width || dx < 0
                         || dy >= this->Height || dy < 0)
                         continue;*/
@@ -213,8 +217,8 @@ void Picture::Lanczos3()
                     if (dy < 0)
                         dy = 0;
 
-                    double Lx = LanczoshFilter(x * CoefWidth - j); //двумерное ядро Ланцоша
-                    double Ly = LanczoshFilter(y * CoefHeight - i); //двумерное ядро Ланцоша
+                    double Lx = LanczoshFilter(i * CoefWidth - z); //двумерное ядро Ланцоша
+                    double Ly = LanczoshFilter(j * CoefHeight - k); //двумерное ядро Ланцоша
                     Result += this->PixelsOld[dy][dx] * Lx * Ly;
                 }
             }
@@ -223,7 +227,7 @@ void Picture::Lanczos3()
             if (Result < 0)
                 Result = 0;
 
-            this->PixelsNew[y][x] = (uchar)Result;
+            this->PixelsNew[j][i] = (uchar)Result;
         }
     }
 }
@@ -252,44 +256,44 @@ void Picture::BCSplines()
     double CoefWidth = this->Width / this->NewWidth;
     vector <vector <uchar>> Buffer(this->NewHeight, vector<uchar>(this->NewWidth));
     //сначала польностью по ширине, затем по высоте
-    for (double y = 0; y < this->NewHeight; y += 1 / CoefHeight)
+    for (double i = 0; i < this->NewHeight; i += 1 / CoefHeight)
     {
-        for (int x = 0; x < this->NewWidth; x++)
+        for (int j = 0; j < this->NewWidth; j++)
         {
             double Result = 0;
-            for (int i = 0; i < this->Width; ++i)
+            for (int k = 0; k < this->Width; ++k)
             {
-                double Kx = BCFilterK(x * CoefWidth - i);
+                double Kx = BCFilterK(j * CoefWidth - k);
                 if (Kx == 0)
                     continue;
-                Result += this->PixelsOld[(int)round(y * CoefHeight)][i] * Kx;
+                Result += this->PixelsOld[(int)round(i * CoefHeight)][k] * Kx;
             }
             if (Result > 255)
                 Result = 255;
             if (Result < 0)
                 Result = 0;
 
-            Buffer[(int)floor(y)][x] = (uchar)Result;
+            Buffer[(int)floor(i)][j] = (uchar)Result;
         }
     }
 
-    for (int x = 0; x < this->NewWidth; ++x)
+    for (int i = 0; i < this->NewWidth; ++i)
     {
-        for (int y = 0; y < this->NewHeight; ++y)
+        for (int j = 0; j < this->NewHeight; ++j)
         {
             double Result = 0;
-            for (double i = 0; i < this->NewHeight; i += 1 / CoefHeight)
+            for (double k = 0; k < this->NewHeight; k += 1 / CoefHeight)
             {
-                double Ky = BCFilterK((y - i) * CoefHeight);
+                double Ky = BCFilterK((j - k) * CoefHeight);
                 if (Ky == 0)
                     continue;
-                Result += Buffer[(int)((floor)(i))][x] * Ky; //floor
+                Result += Buffer[(int)((floor)(k))][i] * Ky; //floor
             }
             if (Result > 255)
                 Result = 255;
             if (Result < 0)
                 Result = 0;
-            this->PixelsNew[y][x] = (uchar)Result;
+            this->PixelsNew[j][i] = (uchar)Result;
         }
     }
     Buffer.clear();
