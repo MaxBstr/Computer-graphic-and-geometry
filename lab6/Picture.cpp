@@ -174,39 +174,39 @@ double Picture::LanczoshFilter(double Value) //фильтр Ланцоша (L)
     double Result;
     if (Value == 0)
         return 1;
-    if (Value >= -3 || Value < 3)
+    if (Value >= -3 && Value < 3)
     {
         Result = (3 * sin(M_PI * Value) * sin(M_PI * Value / 3)) / (M_PI * M_PI * Value * Value);
         return Result;
     }
     else
-        return 0;
+        return 0.0;
 }
 
 void Picture::Lanczos3()
 {
-    for (int i = 0; i < this->NewWidth; ++i) //i = cur_x
+    for (int x = 0; x < this->NewWidth; ++x) //x = cur_x
     {
-        for (int j = 0; j < this->NewHeight; ++j) //j = cur_y
+        for (int y = 0; y < this->NewHeight; ++y) //y = cur_y
         {
             int a = 3;
             double Result = 0;
-            double CoefHeight = this->Height / this->NewHeight;
-            double CoefWidth = this->Width / this->NewWidth;
+            double CoefHeight = (double)this->Height / (double)this->NewHeight;
+            double CoefWidth = (double)this->Width / (double)this->NewWidth;
 
             //оконная функция
-            for (int k = j * CoefHeight - a + 1; k < j * CoefHeight + a; ++k)
+            for (double i = y * CoefHeight - a + 1; i < y * CoefHeight + a; i += 1.0)
             {
-                for (int z = i * CoefWidth - a + 1; z < i * CoefWidth + a; ++z)
+                for (double j = x * CoefWidth - a + 1; j < x * CoefWidth + a; j += 1.0)
                 {
                     //окно не должно выходить за картинку
-                    if (z >= this->Width || z < 0
-                    || k >= this->Height || k < 0)
+                    if (j >= this->Width || j < 0
+                        || i >= this->Height || i < 0)
                         continue;
 
-                    double Lx = LanczoshFilter(i * CoefWidth - z); //двумерное ядро Ланцоша
-                    double Ly = LanczoshFilter(j * CoefHeight - k); //двумерное ядро Ланцоша
-                    Result += this->PixelsNew[k][z] * Lx * Ly;
+                    double Lx = LanczoshFilter(x * CoefWidth - j); //двумерное ядро Ланцоша
+                    double Ly = LanczoshFilter(y * CoefHeight - i); //двумерное ядро Ланцоша
+                    Result += this->PixelsOld[(int)floor(i)][(int)floor(j)] * Lx * Ly;
                 }
             }
             if (Result > 255)
@@ -214,7 +214,7 @@ void Picture::Lanczos3()
             if (Result < 0)
                 Result = 0;
 
-            this->PixelsNew[j][i] = Result; //xz
+            this->PixelsNew[y][x] = (uchar)Result;
         }
     }
 }
