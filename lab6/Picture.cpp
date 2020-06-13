@@ -199,6 +199,7 @@ void Picture::Lanczos3()
             double CoefWidth = (double)this->Width / (double)this->NewWidth;
 
             //оконная функция
+            //формулы для k и z взяты с вики, сумма от целая часть(х) - а + 1 до целая часть(х) + ф
             for (int k = j * CoefHeight - a + 1; k < j * CoefHeight + a; k += 1.0)
             {
                 for (int z = i * CoefWidth - a + 1; z < i * CoefWidth + a; z += 1.0)
@@ -208,6 +209,7 @@ void Picture::Lanczos3()
                     /*if (dx >= this->Width || dx < 0
                         || dy >= this->Height || dy < 0)
                         continue;*/
+                    //проверка границ
                     if (dx >= this->Width)
                         dx = this->Width - 1;
                     if (dy >= this->Height)
@@ -219,7 +221,7 @@ void Picture::Lanczos3()
 
                     double Lx = LanczoshFilter(i * CoefWidth - z); //двумерное ядро Ланцоша
                     double Ly = LanczoshFilter(j * CoefHeight - k); //двумерное ядро Ланцоша
-                    Result += this->PixelsOld[dy][dx] * Lx * Ly;
+                    Result += this->PixelsOld[dy][dx] * Lx * Ly; //добавляем в сумму отфильтрованное значение
                 }
             }
             if (Result > 255)
@@ -232,7 +234,7 @@ void Picture::Lanczos3()
     }
 }
 
-double Picture::BCFilterK(double Value)
+double Picture::BCFilterK(double Value) //формула фильтра с немецкой вики
 {
     double Result = 0;
     if (abs(Value) < 1) //без 1/6
@@ -255,7 +257,9 @@ void Picture::BCSplines()
     double CoefHeight = this->Height / this->NewHeight;
     double CoefWidth = this->Width / this->NewWidth;
     vector <vector <uchar>> Buffer(this->NewHeight, vector<uchar>(this->NewWidth));
-    //сначала польностью по ширине, затем по высоте
+    //ходим  по картинке в новых координатах по ширине!
+    //перемещаемся так, чтобы попадать только в точки, существующие в старых коо-ах
+    //растягиваем каратинку по горизонтали, по вертикали оставляем пробелы
     for (double i = 0; i < this->NewHeight; i += 1 / CoefHeight)
     {
         for (int j = 0; j < this->NewWidth; j++)
@@ -263,36 +267,45 @@ void Picture::BCSplines()
             double Result = 0;
             for (int k = 0; k < this->Width; ++k)
             {
+                //высчитываем фильтр для точки
                 double Kx = BCFilterK(j * CoefWidth - k);
                 if (Kx == 0)
                     continue;
+                //суммируем отфильтрованные значения
                 Result += this->PixelsOld[(int)round(i * CoefHeight)][k] * Kx;
             }
             if (Result > 255)
                 Result = 255;
             if (Result < 0)
                 Result = 0;
-
+            //записываем в картинку сглаженную строку
             Buffer[(int)floor(i)][j] = (uchar)Result;
         }
     }
 
+    //ходим по новым координатам
     for (int i = 0; i < this->NewWidth; ++i)
     {
         for (int j = 0; j < this->NewHeight; ++j)
         {
             double Result = 0;
+            // Здесь проходим по столбцу, задействуя только строки,
+            // записанные на прошлом проходе
             for (double k = 0; k < this->NewHeight; k += 1 / CoefHeight)
             {
+                // Высчитываем фильтр для конкретной точки,
+                // не забыв, что нужно дать значние для старых координат
                 double Ky = BCFilterK((j - k) * CoefHeight);
                 if (Ky == 0)
                     continue;
+                // Суммируем фильтрованные значения
                 Result += Buffer[(int)((floor)(k))][i] * Ky; //floor
             }
             if (Result > 255)
                 Result = 255;
             if (Result < 0)
                 Result = 0;
+            //запись готового пикселя в картинку
             this->PixelsNew[j][i] = (uchar)Result;
         }
     }
