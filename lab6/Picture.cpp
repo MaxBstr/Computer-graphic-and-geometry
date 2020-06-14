@@ -175,12 +175,11 @@ void Picture::Bilinear()
 
 double Picture::LanczoshFilter(double Value) //фильтр Ланцоша (L)
 {
-    double Result;
     if (Value == 0)
-        return 1;
+        return 1.0;
     if (Value >= -3 && Value < 3)
     {
-        Result = (3 * sin(M_PI * Value) * sin(M_PI * Value / 3)) / (M_PI * M_PI * Value * Value);
+        double Result = (3 * sin(M_PI * Value) * sin(M_PI * Value / 3)) / (M_PI * M_PI * Value * Value);
         return Result;
     }
     else
@@ -200,13 +199,12 @@ void Picture::Lanczosh()
 
             //оконная функция
             //формулы для k и z взяты с вики, сумма от целая часть(х) - а + 1 до целая часть(х) + a
-            for (int k = j * CoefHeight - a + 1; k < j * CoefHeight + a; k += 1.0)
+            for (int k = j * CoefHeight - a; k < j * CoefHeight + a; k += 1.0)
             {
-                for (int z = i * CoefWidth - a + 1; z < i * CoefWidth + a; z += 1.0)
+                for (int z = i * CoefWidth - a; z < i * CoefWidth + a; z += 1.0)
                 {
                     //окно не должно выходить за картинку
                     int dy = k, dx = z;
-
                     //проверка границ
                     if (dx >= this->Width)
                         dx = this->Width - 1;
