@@ -10,7 +10,9 @@ using namespace std;
 
 struct Pixel
 {
-    uchar First, Second, Third;
+    uchar First;
+    uchar Second;
+    uchar Third;
 };
 
 class Picture
@@ -19,9 +21,9 @@ private:
     int Height, Width, ColorDepth;
     vector <vector<Pixel>> Pixels;
     char P, FormatNum;
-    double Multiplier; //смещение и множитель
-    int Offset;
-    uchar UseOffsetAndMultiplier(uchar Pixel);
+    double Multiplier; //множитель
+    int Offset; //смещение
+    uchar UseOffsetAndMultiplier(uchar);
     void FROM_RGB_TO_YCbCr601();
     void FROM_YCbCr601_TO_RGB();
     void UseType0();
@@ -34,7 +36,7 @@ public:
     ~Picture();
     void GetFile(string& FName);
     void WriteFile(string& FName);
-    void SetParams(int Offset, double Multiplier);
-    void SetType(int Choice);
+    void SetParams(int, double);
+    void SetType(int);
     void WriteParamsConsole();
 };
