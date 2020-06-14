@@ -86,7 +86,7 @@ void Picture::SetType(int TypeAlgo)
         }
         case 2:
         {
-            Lanczos3();
+            Lanczosh();
             break;
         }
         case 3:
@@ -187,7 +187,7 @@ double Picture::LanczoshFilter(double Value) //фильтр Ланцоша (L)
         return 0.0;
 }
 
-void Picture::Lanczos3()
+void Picture::Lanczosh()
 {
     for (int i = 0; i < this->NewWidth; ++i) //i = cur_x
     {
@@ -206,9 +206,7 @@ void Picture::Lanczos3()
                 {
                     //окно не должно выходить за картинку
                     int dy = k, dx = z;
-                    /*if (dx >= this->Width || dx < 0
-                        || dy >= this->Height || dy < 0)
-                        continue;*/
+
                     //проверка границ
                     if (dx >= this->Width)
                         dx = this->Width - 1;
@@ -259,13 +257,13 @@ void Picture::BCSplines()
     vector <vector <uchar>> Buffer(this->NewHeight, vector<uchar>(this->NewWidth));
     //ходим  по картинке в новых координатах по ширине!
     //перемещаемся так, чтобы попадать только в точки, существующие в старых коо-ах
-    //растягиваем каратинку по горизонтали, по вертикали оставляем пробелы
+    //растягиваем картинку по горизонтали, по вертикали оставляем пробелы
     for (double i = 0; i < this->NewHeight; i += 1 / CoefHeight)
     {
         for (int j = 0; j < this->NewWidth; j++)
         {
             double Result = 0;
-            for (int k = 0; k < this->Width + 10; ++k)
+            for (int k = 0; k < this->Width + 5 / CoefWidth; ++k)
             {
                 int dk = k;
                 if (dk >= this->Width)
@@ -294,15 +292,18 @@ void Picture::BCSplines()
             double Result = 0;
             // Здесь проходим по столбцу, задействуя только строки,
             // записанные на прошлом проходе
-            for (double k = 0; k < this->NewHeight; k += 1 / CoefHeight)
+            for (double k = 0; k < this->NewHeight + 5 / CoefHeight; k += 1 / CoefHeight)
             {
+                double dk = k;
+                if (dk >= this->NewHeight)
+                    dk = this->NewHeight - 1 / CoefHeight;
                 // Высчитываем фильтр для конкретной точки,
                 // не забыв, что нужно дать значние для старых координат
                 double Ky = BCFilterK((j - k) * CoefHeight);
                 if (Ky == 0)
                     continue;
                 // Суммируем фильтрованные значения
-                Result += Buffer[(int)((floor)(k))][i] * Ky; //floor
+                Result += Buffer[(int)((floor)(dk))][i] * Ky; //floor
             }
             if (Result > 255)
                 Result = 255;
