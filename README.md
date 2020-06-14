@@ -1,4 +1,4 @@
 Struggles && Suicide
 
-Pls, somebody help me
-Daite zachyot
+Pls, somebody help me!
+<b>Daite zachyot!</b>
