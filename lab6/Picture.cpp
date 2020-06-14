@@ -144,9 +144,6 @@ void Picture::Bilinear()
             double DifferenceX = i * CoefWidth - PxOldX; // Вычисляем разницу между целыми координатами
             double DifferenceY = j * CoefHeight - PxOldY; //в старой системе и вычисленной из новой
 
-            if ((PxOldY < this->NewHeight) && (PxOldX < this->NewWidth)
-                && (PxOldX >= 0) && (PxOldY >= 0))
-            {
                 //конкретная точка
                 double A = this->PixelsOld[PxOldY][PxOldX];
 
@@ -164,12 +161,15 @@ void Picture::Bilinear()
                 double D = PixelsOld[PxOldY][PxOldX];
                 if(PxOldY + 1 < this->Height && PxOldX + 1 < this->Width)
                     D = this->PixelsOld[PxOldY + 1][PxOldX + 1];
+                else if (PxOldY + 1 < this->Height)
+                    D = this->PixelsOld[PxOldY + 1][PxOldX];
+                else if (PxOldX + 1 < this->Width)
+                    D = this->PixelsOld[PxOldY][PxOldX + 1];
 
                 //нашли значения пикселей в старой картинке, на их основе
                 //применяем интерполяцию, чтобы получить новый пиксель
                 //пикселю новой картинки присваем значение интерполяции координат из старой картинки
                 this->PixelsNew[j][i] = Interpolate(DifferenceX, DifferenceY, A, B, C, D);
-            }
         }
 }
 
@@ -199,7 +199,7 @@ void Picture::Lanczosh()
             double CoefWidth = (double)this->Width / (double)this->NewWidth;
 
             //оконная функция
-            //формулы для k и z взяты с вики, сумма от целая часть(х) - а + 1 до целая часть(х) + ф
+            //формулы для k и z взяты с вики, сумма от целая часть(х) - а + 1 до целая часть(х) + a
             for (int k = j * CoefHeight - a + 1; k < j * CoefHeight + a; k += 1.0)
             {
                 for (int z = i * CoefWidth - a + 1; z < i * CoefWidth + a; z += 1.0)
@@ -263,9 +263,11 @@ void Picture::BCSplines()
         for (int j = 0; j < this->NewWidth; j++)
         {
             double Result = 0;
-            for (int k = 0; k < this->Width + 5 / CoefWidth; ++k)
+            for (int k = -5 / CoefWidth; k < this->Width + 5 / CoefWidth; ++k)
             {
                 int dk = k;
+                if (dk < 0)
+                    dk = 0;
                 if (dk >= this->Width)
                     dk = this->Width - 1; //для правой границы убирает черную линию
                 //высчитываем фильтр для точки
@@ -292,9 +294,11 @@ void Picture::BCSplines()
             double Result = 0;
             // Здесь проходим по столбцу, задействуя только строки,
             // записанные на прошлом проходе
-            for (double k = 0; k < this->NewHeight + 5 / CoefHeight; k += 1 / CoefHeight)
+            for (double k = -5 / CoefHeight; k < this->NewHeight + 5 / CoefHeight; k += 1 / CoefHeight)
             {
                 double dk = k;
+                if (dk < 0)
+                    dk = 0;
                 if (dk >= this->NewHeight)
                     dk = this->NewHeight - 1 / CoefHeight;
                 // Высчитываем фильтр для конкретной точки,
