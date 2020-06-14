@@ -1,4 +1,3 @@
-#include <iostream>
 #include "Picture.h"
 //lab.exe InputName, OutputName, type, offset, multiplier
 int main(int argc, char *argv[])
