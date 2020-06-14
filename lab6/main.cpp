@@ -19,8 +19,8 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    double DX = atof(argv[5]); //не учитываем
-    double DY = atof(argv[6]); //не учитываем
+    double DX = atof(argv[5]); //не учитываем смещение
+    double DY = atof(argv[6]); //не учитываем смещение
     double Gamma = atof(argv[7]); //не учитываем гамму
     int TypeAlgo = atoi(argv[8]);
 
