@@ -254,8 +254,8 @@ double Picture::BCFilterK(double Value) //формула фильтра с не�
 
 void Picture::BCSplines()
 {
-    double CoefHeight = this->Height / this->NewHeight;
-    double CoefWidth = this->Width / this->NewWidth;
+    double CoefHeight = (double)this->Height / (double)this->NewHeight;
+    double CoefWidth = (double)this->Width / (double)this->NewWidth;
     vector <vector <uchar>> Buffer(this->NewHeight, vector<uchar>(this->NewWidth));
     //ходим  по картинке в новых координатах по ширине!
     //перемещаемся так, чтобы попадать только в точки, существующие в старых коо-ах
@@ -265,14 +265,17 @@ void Picture::BCSplines()
         for (int j = 0; j < this->NewWidth; j++)
         {
             double Result = 0;
-            for (int k = 0; k < this->Width; ++k)
+            for (int k = 0; k < this->Width + 10; ++k)
             {
+                int dk = k;
+                if (dk >= this->Width)
+                    dk = this->Width - 1; //для правой границы убирает черную линию
                 //высчитываем фильтр для точки
                 double Kx = BCFilterK(j * CoefWidth - k);
                 if (Kx == 0)
                     continue;
                 //суммируем отфильтрованные значения
-                Result += this->PixelsOld[(int)round(i * CoefHeight)][k] * Kx;
+                Result += this->PixelsOld[(int)round(i * CoefHeight)][dk] * Kx;
             }
             if (Result > 255)
                 Result = 255;
