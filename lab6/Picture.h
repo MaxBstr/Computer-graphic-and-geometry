@@ -25,7 +25,7 @@ private:
     uchar P, FormatNum;
     double BSpline, CSpline;
     void ClosestNeighbour();
-    double Interpolate(double, double,double, double, double, double);
+    double Interpolate(double, double, double, double, double, double);
     void Bilinear();
     double LanczoshFilter(double);
     void Lanczosh();
