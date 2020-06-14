@@ -2,12 +2,12 @@
 
 int main(int argc, char* argv[])
 {
-    if (argc < 9)
+    if (argc < 8 || argc > 10) //8 параметров минимум, для сплайнов максимум 10
     {
         cerr << "Not enough params!";
         return 1;
     }
-
+    //lab6.exe(0) input(1) output(2) width(3) height(4) dx(5) dy(6) gamma(7) type(8) B(9) C(10)
     string InputName = argv[1];
     string OutPutName = argv[2];
     int NewWidth = atoi(argv[3]);
@@ -25,10 +25,11 @@ int main(int argc, char* argv[])
     int TypeAlgo = atoi(argv[8]);
 
     double B = 0, C = 0.5;
-    if (argc == 9)
+    if (argc > 9) //если задано B (argc == 9)
+    {
         B = atof(argv[9]);
-    if (argc == 10)
         C = atof(argv[10]);
+    }
 
     Picture* IMG = new Picture(B, C, NewWidth, NewHeight);
 
@@ -51,9 +52,9 @@ int main(int argc, char* argv[])
     }
     catch (const exception& WARNING)
     {
-            cerr << WARNING.what() << endl;
-            delete IMG;
-            return 1;
+        cerr << WARNING.what() << endl;
+        delete IMG;
+        return 1;
     }
 
     try
