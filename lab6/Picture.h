@@ -27,7 +27,7 @@ private:
     double Interpolate(double, double,double, double, double, double);
     void Bilinear();
     double LanczoshFilter(double);
-    void Lanczos3();
+    void Lanczosh();
     double BCFilterK(double);
     void BCSplines();
 };
