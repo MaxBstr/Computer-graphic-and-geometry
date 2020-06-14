@@ -2,7 +2,7 @@
 
 int main(int argc, char* argv[])
 {
-    if (argc < 8 || argc > 10) //8 параметров минимум, для сплайнов максимум 10
+    if (argc < 8 || argc > 11) //8 параметров минимум, для сплайнов максимум 11
     {
         cerr << "Not enough params!";
         return 1;
@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
     int TypeAlgo = atoi(argv[8]);
 
     double B = 0, C = 0.5;
-    if (argc > 9) //если задано B и C (argc == 10)
+    if (argc > 9) //если задано B (argc == 9)
     {
         B = atof(argv[9]);
         C = atof(argv[10]);
