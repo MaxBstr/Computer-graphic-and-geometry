@@ -21,7 +21,7 @@ void Picture::GetFile(string& FName)
         throw runtime_error("Failed to open input file!");
 
     Input >> this->P >> this->FormatNum;
-    if(P != 'P' || FormatNum != '5')
+    if (P != 'P' || FormatNum != '5')
         throw runtime_error("Unknown format! Only for P5 format files.");
 
     Input >> this->Width >> this->Height;
@@ -31,23 +31,23 @@ void Picture::GetFile(string& FName)
     PixelsOld.assign(this->Height, vector<uchar>(this->Width));
 
     Input >> this->ColorDepth;
-    if(this->ColorDepth != 255)
+    if (this->ColorDepth != 255)
         throw runtime_error("Invalid ColorDepth! Must be equal 255.");
 
-            char space; //лишний пиксель '\n'
-            Input.read(&space, 1);
-            for (int i = 0; i < this->Height; ++i)
-                for (int j = 0; j < this->Width; ++j)
-                {
-                    char CurPx;
-                    Input.read(&CurPx, sizeof(char));
-                    PixelsOld[i][j] = CurPx;
-                }
+    char space; //лишний пиксель '\n'
+    Input.read(&space, 1);
+    for (int i = 0; i < this->Height; ++i)
+        for (int j = 0; j < this->Width; ++j)
+        {
+            char CurPx;
+            Input.read(&CurPx, sizeof(char));
+            PixelsOld[i][j] = CurPx;
+        }
 
     Input.close();
 }
 
-void Picture::WriteFile(string &FName)
+void Picture::WriteFile(string& FName)
 {
     ofstream Output(FName, ios::binary);
     if (!Output.is_open())
@@ -60,7 +60,7 @@ void Picture::WriteFile(string &FName)
 
     for (int i = 0; i < this->NewHeight; ++i)
         for (int j = 0; j < this->NewWidth; ++j)
-             Output << PixelsNew[i][j];
+            Output << PixelsNew[i][j];
 
     Output.flush();
     Output.close();
@@ -72,7 +72,7 @@ void Picture::SetType(int TypeAlgo)
     //1 - билинейная интерполяция
     //2 - Ланцош
     //3 - BC - сплайны
-    switch(TypeAlgo)
+    switch (TypeAlgo)
     {
         case 0:
         {
@@ -118,7 +118,7 @@ void Picture::ClosestNeighbour()
 double Picture::Interpolate(double SquareWidth, double SquareHeight, double A, double B, double C, double D)
 {
     A *= ((1.0 - SquareWidth) * (1.0 - SquareHeight));
-    B *= (SquareWidth*(1.0 - SquareHeight));
+    B *= (SquareWidth * (1.0 - SquareHeight));
     C *= (SquareHeight * (1.0 - SquareWidth));
     D *= (SquareHeight * SquareWidth);
 
@@ -144,32 +144,32 @@ void Picture::Bilinear()
             double DifferenceX = i * CoefWidth - PxOldX; // Вычисляем разницу между целыми координатами
             double DifferenceY = j * CoefHeight - PxOldY; //в старой системе и вычисленной из новой
 
-                //конкретная точка
-                double A = this->PixelsOld[PxOldY][PxOldX];
+            //конкретная точка
+            double A = this->PixelsOld[PxOldY][PxOldX];
 
-                //точка правее A                                        // A.......B
-                double B = PixelsOld[PxOldY][PxOldX]; //0               // .........
-                if (PxOldX + 1 < this->Width)                           // .........
-                    B = this->PixelsOld[PxOldY][PxOldX + 1];            // C.......D
+            //точка правее A                                        // A.......B
+            double B = PixelsOld[PxOldY][PxOldX]; //0               // .........
+            if (PxOldX + 1 < this->Width)                           // .........
+                B = this->PixelsOld[PxOldY][PxOldX + 1];            // C.......D
 
-                //точка ниже A
-                double C = PixelsOld[PxOldY][PxOldX];//0
-                if (PxOldY + 1 < this->Height)
-                    C = this->PixelsOld[PxOldY + 1][PxOldX];
+            //точка ниже A
+            double C = PixelsOld[PxOldY][PxOldX];//0
+            if (PxOldY + 1 < this->Height)
+                C = this->PixelsOld[PxOldY + 1][PxOldX];
 
-                //точка правее и ниже A
-                double D = PixelsOld[PxOldY][PxOldX];
-                if(PxOldY + 1 < this->Height && PxOldX + 1 < this->Width)
-                    D = this->PixelsOld[PxOldY + 1][PxOldX + 1];
-                else if (PxOldY + 1 < this->Height)
-                    D = this->PixelsOld[PxOldY + 1][PxOldX];
-                else if (PxOldX + 1 < this->Width)
-                    D = this->PixelsOld[PxOldY][PxOldX + 1];
+            //точка правее и ниже A
+            double D = PixelsOld[PxOldY][PxOldX];
+            if (PxOldY + 1 < this->Height && PxOldX + 1 < this->Width)
+                D = this->PixelsOld[PxOldY + 1][PxOldX + 1];
+            else if (PxOldY + 1 < this->Height)
+                D = this->PixelsOld[PxOldY + 1][PxOldX];
+            else if (PxOldX + 1 < this->Width)
+                D = this->PixelsOld[PxOldY][PxOldX + 1];
 
-                //нашли значения пикселей в старой картинке, на их основе
-                //применяем интерполяцию, чтобы получить новый пиксель
-                //пикселю новой картинки присваем значение интерполяции координат из старой картинки
-                this->PixelsNew[j][i] = Interpolate(DifferenceX, DifferenceY, A, B, C, D);
+            //нашли значения пикселей в старой картинке, на их основе
+            //применяем интерполяцию, чтобы получить новый пиксель
+            //пикселю новой картинки присваем значение интерполяции координат из старой картинки
+            this->PixelsNew[j][i] = Interpolate(DifferenceX, DifferenceY, A, B, C, D);
         }
 }
 
@@ -235,14 +235,14 @@ double Picture::BCFilterK(double Value) //формула фильтра с не�
     double Result = 0;
     if (abs(Value) < 1) //без 1/6
         Result = (12 - 9 * this->BSpline - 6 * this->CSpline) * pow(abs(Value), 3)
-                + (-18 + 12 * this->BSpline + 6 * this->CSpline) * pow(abs(Value), 2)
-                + (6 - 2 * this->BSpline);
+                 + (-18 + 12 * this->BSpline + 6 * this->CSpline) * pow(abs(Value), 2)
+                 + (6 - 2 * this->BSpline);
 
     if (abs(Value) >= 1 && abs(Value) < 2) //без 1/6
         Result = (-this->BSpline - 6 * this->CSpline) * pow(abs(Value), 3)
-                + (6 * this->BSpline + 30 * this->CSpline) * pow(abs(Value), 2)
-                + (-12 * this->BSpline - 48 * this->CSpline) * abs(Value)
-                + (8 * this->BSpline + 24 * this->CSpline);
+                 + (6 * this->BSpline + 30 * this->CSpline) * pow(abs(Value), 2)
+                 + (-12 * this->BSpline - 48 * this->CSpline) * abs(Value)
+                 + (8 * this->BSpline + 24 * this->CSpline);
     //если условия не сработали, возвращаем 0
     Result *= (1.0 / 6.0); //с 1/6
     return Result;
