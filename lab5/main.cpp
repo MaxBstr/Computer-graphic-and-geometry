@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
             }
             default:
             {
-                cerr << "Unknown type! Can be in [0; 5]" << endl;
+                cerr << "Unknown type! Can be in [0; 3]" << endl;
                 delete IMG;
                 return 1;
             }
