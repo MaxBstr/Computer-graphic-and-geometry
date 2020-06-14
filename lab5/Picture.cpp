@@ -118,8 +118,7 @@ void Picture::WriteFile(string &FName)
 
 void Picture::WriteParamsConsole()
 {
-    cout << "Offset: " << this->Offset << endl;
-    cout << "Multiplier: " << this->Multiplier << endl;
+    cout << this->Offset << " " << this->Multiplier << endl;
 }
 
 void Picture::SetParams(int Offset, double Multiplier)
