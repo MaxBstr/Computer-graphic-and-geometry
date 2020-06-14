@@ -179,7 +179,7 @@ double Picture::LanczoshFilter(double Value) //фильтр Ланцоша (L)
         return 1.0;
     if (Value >= -3 && Value < 3)
     {
-        double Result = (3 * sin(M_PI * Value) * sin(M_PI * Value / 3)) / (M_PI * M_PI * Value * Value);
+        double Result = (3 * sin(PI * Value) * sin(PI * Value / 3)) / (PI * PI * Value * Value);
         return Result;
     }
     else
