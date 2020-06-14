@@ -5,6 +5,7 @@
 #include <string>
 #include <cmath>
 #include <exception>
+#define PI 3.14159265358979323846
 using namespace std;
 
 typedef unsigned char uchar;
