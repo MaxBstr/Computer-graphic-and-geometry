@@ -1,3 +1,1 @@
-Struggles && Suicide
-
-Pls, somebody help me!
+<strong> ПОЛУЧИЛ ЗАЧЕТ! </strong>
